@@ -10,13 +10,3 @@ export async function checkSlackConnection() {
   const resp = await apiClient.get('/slack/check');
   return resp.data;
 }
-
-export async function exchangeSlackCode(code) {
-  const response = await axios.get('/api/slack/callback', {
-    params: { code },
-  });
-  if (!response.data.success) {
-    throw new Error(response.data.message || 'Slack OAuth exchange failed');
-  }
-  return response.data.message;
-}

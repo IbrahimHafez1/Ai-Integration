@@ -7,7 +7,6 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import SlackIntegration from './pages/SlackIntegration';
-import SlackOAuthCallback from './pages/SlackOAuthCallback';
 import LeadLogs from './pages/LeadLogs';
 import CRMLogs from './pages/CRMLogs';
 import TriggerConfigs from './pages/TriggerConfigs';
@@ -22,6 +21,7 @@ export default function App() {
 
   return (
     <div>
+      {/* ——— Updated Header ——— */}
       <nav className="nav-bar">
         <div className="nav-left">
           <Link to="/" className="nav-brand">
@@ -63,6 +63,7 @@ export default function App() {
         </div>
       </nav>
 
+      {/* ——— Page Routes ——— */}
       <Routes>
         <Route path="/" element={<Home />} />
 
@@ -83,15 +84,6 @@ export default function App() {
           element={
             <PrivateRoute>
               <SlackIntegration />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/slack/callback"
-          element={
-            <PrivateRoute>
-              <SlackOAuthCallback />
             </PrivateRoute>
           }
         />
