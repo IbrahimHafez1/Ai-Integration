@@ -6,8 +6,8 @@ import { handleSlackCallback, redirectToSlack } from '../controllers/authControl
 const router = express.Router();
 
 router.post('/events', ensureAuth, handleSlackEvents);
-router.get('slack/check', ensureAuth, checkSlackConnection);
-router.get('/slack', ensureAuth, redirectToSlack);
-router.get('/slack/callback', ensureAuth, handleSlackCallback);
+router.get('/', ensureAuth, redirectToSlack);
+router.get('/check', ensureAuth, checkSlackConnection);
+router.get('/callback', ensureAuth, handleSlackCallback);
 
 export default router;

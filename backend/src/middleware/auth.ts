@@ -18,7 +18,6 @@ export const ensureAuth = (req: AuthRequest, res: Response, next: NextFunction) 
     req.user = { _id: payload.id, email: payload.email };
     next();
   } catch (err) {
-    console.log({ err });
     next(new ApiError('Invalid token', 401));
   }
 };
