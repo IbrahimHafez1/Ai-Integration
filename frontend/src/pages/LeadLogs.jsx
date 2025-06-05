@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getLeadLogs } from '../services/logService';
-import './leadLogs.css'; // Import the CSS file
+import './LeadLogs.css'; // Import the CSS file
 
 export default function LeadLogs() {
   const [logs, setLogs] = useState([]);
