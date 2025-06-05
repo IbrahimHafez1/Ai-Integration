@@ -106,14 +106,28 @@ nav {
 .nav-right {
   display: flex;
   align-items: center;
+  gap: 1.5rem;
 }
 
-.nav-link {
-  margin-left: 1.5rem;
-  color: #333333;
+.nav-link,
+.nav-button {
   font-weight: 500;
   text-decoration: none;
-  transition: color 0.2s ease;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 40px;
+  line-height: 40px;
+
+  padding: 0 0.5rem;
+  border: none;
+  background: none;
+  color: #333333;
+  font-size: 1rem;
+  margin: 0;
 }
 
 .nav-link:hover {
@@ -121,13 +135,7 @@ nav {
 }
 
 .nav-button {
-  margin-left: 1.5rem;
-  background: none;
-  border: none;
   color: #e84118;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.2s ease;
 }
 
 .nav-button:hover {
