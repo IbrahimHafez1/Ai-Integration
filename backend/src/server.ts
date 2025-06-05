@@ -11,6 +11,7 @@ import router from './routes/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { initSocket } from './utils/socket.js';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -33,8 +34,9 @@ dotenv.config();
 
   app.use('/api', router);
 
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
   // Serve static files from frontend build
-  app.use(express.static('../frontend/build'));
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
   // Catch-all handler for React Router
   app.get('*', (req, res) => {
