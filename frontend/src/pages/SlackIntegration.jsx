@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { redirectToSlack, checkSlackConnection } from '../services/slackService';
-import './SlackIntegration.css'; // Optional CSS file
+import './SlackIntegration.css';
 
 export default function SlackIntegration() {
   const { user } = useContext(AuthContext);
@@ -12,7 +12,7 @@ export default function SlackIntegration() {
     async function fetchStatus() {
       try {
         const resp = await checkSlackConnection();
-        setIsConnected(resp.data.connected);
+        setIsConnected(resp.connected);
       } catch (err) {
         setIsConnected(false);
         setError('Failed to check Slack connection');
