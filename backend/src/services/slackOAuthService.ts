@@ -23,28 +23,25 @@ export async function exchangeSlackCodeAndSave(userId: string, code: string) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
   } catch (err: any) {
-    throw new ApiError(`Slack OAuth error: ${err.message}`, 500);
+    throw new ApiError(`Slack OAuth request failed: ${err.message}`, 500);
   }
 
   if (!resp.data.ok) {
-    // Slack returns { ok: false, error: '...' }
     throw new ApiError(`Slack OAuth failed: ${resp.data.error}`, 400);
   }
 
-  // Slack OAuth v2 returns access_token, refresh_token (if granules+), expires_in, etc.
   const { access_token, refresh_token, expires_in } = resp.data;
   const expiresAt = expires_in ? new Date(Date.now() + expires_in * 1000) : undefined;
 
   const filter = { userId, provider: 'slack' };
   const update = {
     accessToken: access_token,
-    // Slack may not always send refresh_token if your app is single‐workspace
     ...(refresh_token && { refreshToken: refresh_token }),
     ...(expiresAt && { expiresAt }),
   };
   const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-  const tokenDoc = await OAuthToken.findOneAndUpdate(filter, update, options).lean();
+  const tokenDoc = await OAuthToken.findOneAndUpdate(filter, update, options);
   return tokenDoc;
 }
 

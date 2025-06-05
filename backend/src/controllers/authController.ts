@@ -27,15 +27,16 @@ export function redirectToSlack(req: Request, res: Response) {
 export async function handleSlackCallback(req: any, res: Response, next: NextFunction) {
   try {
     const code = req.query.code;
-    const userId = req.user?.id;
+    const userId = req.user?._id;
+
     if (!code || !userId) {
-      throw new ApiError('Missing code or userId', 400);
+      throw new ApiError('Missing OAuth code or user authentication', 400);
     }
 
     await exchangeSlackCodeAndSave(userId, code);
     sendSuccess(res, null, 'Slack connected successfully');
     return;
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 }
