@@ -89,7 +89,7 @@ export default function App() {
           }
         />
 
-        <Route path="/slack/oauth-callback" element={<SlackOAuthHandler />} />
+        <Route path="/slack/callback" element={<SlackOAuthHandler />} />
 
         <Route
           path="/logs/leads"
