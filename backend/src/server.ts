@@ -40,7 +40,7 @@ dotenv.config();
 
   // Catch-all handler for React Router
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve('../../frontend/build/index.html'));
+    res.sendFile(path.resolve('../../frontend/dist/index.html'));
   });
 
   app.use(errorHandler);
