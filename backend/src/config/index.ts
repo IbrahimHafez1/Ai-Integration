@@ -4,6 +4,8 @@ dotenv.config();
 export default {
   port: Number(process.env.PORT) || 4000,
 
+  frontendBaseUrl: process.env.FRONTEND_BASE_URL as string,
+
   mongodbUri: process.env.MONGODB_URI as string,
 
   jwt: {

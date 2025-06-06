@@ -13,6 +13,6 @@ router.post('/events', ensureAuth, handleSlackEvents);
 router.get('/', redirectToSlack);
 router.get('/check', ensureAuth, checkSlackConnection);
 router.get('/callback', handleSlackCallback);
-router.get('/save-token', ensureAuth, saveSlackToken);
+router.get('/save-token', saveSlackToken);
 
 export default router;

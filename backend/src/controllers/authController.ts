@@ -3,7 +3,6 @@ import { Request, Response, NextFunction } from 'express';
 import config from '../config/index.js';
 import { exchangeSlackCodeAndSave } from '../services/slackOAuthService.js';
 import { ApiError } from '../utils/errors.js';
-import jwt, { JwtPayload } from 'jsonwebtoken';
 
 /**
  * Redirect user to Slack OAuth v2 authorize page.
@@ -38,15 +37,18 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
   try {
     const { code, state } = req.query;
 
-    if (typeof code !== 'string') {
+    if (!isString(code)) {
       throw new ApiError('Invalid or missing OAuth code', 400);
     }
-
-    if (typeof state !== 'string') {
+    if (!isString(state)) {
       throw new ApiError('Missing state parameter', 400);
     }
 
-    return res.redirect(`/slack/oauth-callback?code=${encodeURIComponent(code)}`);
+    // Redirect to the front‐end SlackOAuthHandler with both code & state:
+    return res.redirect(
+      `${config.frontendBaseUrl}/slack/oauth-callback?` +
+        `code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
+    );
   } catch (error) {
     next(error);
   }
