@@ -9,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.post('/events', ensureAuth, handleSlackEvents);
+router.post('/events', handleSlackEvents);
 router.get('/', redirectToSlack);
 router.get('/check', ensureAuth, checkSlackConnection);
 router.get('/callback', handleSlackCallback);
