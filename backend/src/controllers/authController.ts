@@ -2,7 +2,6 @@
 import { Request, Response, NextFunction } from 'express';
 import config from '../config/index.js';
 import { exchangeSlackCodeAndSave } from '../services/slackOAuthService.js';
-import { sendSuccess } from '../utils/response.js';
 import { ApiError } from '../utils/errors.js';
 
 /**
@@ -18,13 +17,25 @@ export function redirectToSlack(req: Request, res: Response) {
   return res.redirect(slackUrl.toString());
 }
 
-/**
- * Handle Slack’s OAuth callback:
- *   1) Exchange “code” for tokens
- *   2) Save tokens in DB
- *   3) Return a JSON success
- */
-export async function handleSlackCallback(req: any, res: Response, next: NextFunction) {
+function isString(value: any): value is string {
+  return typeof value === 'string';
+}
+
+export async function handleSlackCallback(req: Request, res: Response, next: NextFunction) {
+  try {
+    const code = req.query.code;
+
+    if (!isString(code)) {
+      throw new ApiError('Invalid or missing OAuth code', 400);
+    }
+
+    return res.redirect(`/slack/save-token?code=${encodeURIComponent(code)}`);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function saveSlackToken(req: any, res: Response, next: NextFunction) {
   try {
     const code = req.query.code;
     const userId = req.user?._id;
@@ -34,7 +45,8 @@ export async function handleSlackCallback(req: any, res: Response, next: NextFun
     }
 
     await exchangeSlackCodeAndSave(userId, code);
-    sendSuccess(res, null, 'Slack connected successfully');
+
+    res.send('Slack connected successfully!');
     return;
   } catch (error) {
     next(error);
