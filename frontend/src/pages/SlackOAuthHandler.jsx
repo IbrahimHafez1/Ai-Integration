@@ -6,23 +6,24 @@ function isString(value) {
 }
 
 export default function SlackOAuthHandler() {
-  const [status, setStatus] = useState('loading'); // 'loading', 'success', 'error'
+  const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
+    const state = params.get('state'); // this is your JWT token
 
-    if (!isString(code) || !code) {
+    if (!isString(code) || !code || !isString(state) || !state) {
       setStatus('error');
-      setMessage('Invalid or missing OAuth code in URL');
+      setMessage('Invalid or missing OAuth code or user token in URL');
       return;
     }
 
     async function saveToken() {
       try {
-        const response = await apiClient.get(`/slack/save-token`, {
-          params: { code },
+        const response = await apiClient.get('/slack/save-token', {
+          params: { code, userToken: state },
           withCredentials: true,
         });
 
@@ -37,13 +38,8 @@ export default function SlackOAuthHandler() {
     saveToken();
   }, []);
 
-  if (status === 'loading') {
-    return <div>Connecting to Slack...</div>;
-  }
-
-  if (status === 'error') {
-    return <div style={{ color: 'red' }}>Error: {message}</div>;
-  }
+  if (status === 'loading') return <div>Connecting to Slack...</div>;
+  if (status === 'error') return <div style={{ color: 'red' }}>Error: {message}</div>;
 
   return <div style={{ color: 'green' }}>{message}</div>;
 }

@@ -1,47 +1,24 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import { redirectToSlack, checkSlackConnection } from '../services/slackService';
-import './SlackIntegration.css'; // Optional CSS file
+import { redirectToSlackOAuth } from '../../utils/slackOAuth';
+import './SlackIntegration.css';
 
 export default function SlackIntegration() {
-  const { user } = useContext(AuthContext);
-  const [isConnected, setIsConnected] = useState(null);
-  const [error, setError] = useState('');
+  const { token } = useContext(AuthContext);
 
-  useEffect(() => {
-    async function fetchStatus() {
-      try {
-        const resp = await checkSlackConnection();
-        setIsConnected(resp.data.connected);
-      } catch (err) {
-        setIsConnected(false);
-        setError('Failed to check Slack connection');
-      }
+  const handleConnectSlack = () => {
+    if (!token) {
+      alert('You must be logged in to connect Slack');
+      return;
     }
-    fetchStatus();
-  }, []);
-
-  const handleConnect = () => {
-    redirectToSlack();
+    redirectToSlackOAuth(token);
   };
 
   return (
     <div className="profile-container">
       <div className="profile-card">
         <h2>Slack Integration</h2>
-        {isConnected === null ? (
-          <p>Checking Slack connection...</p>
-        ) : isConnected ? (
-          <div className="alert success">
-            ✅ Slack is already connected for user <strong>{user.email}</strong>
-          </div>
-        ) : (
-          <>
-            <p>🔗 Slack is not connected yet.</p>
-            <button onClick={handleConnect}>Connect Slack</button>
-            {error && <div className="alert error">{error}</div>}
-          </>
-        )}
+        <button onClick={handleConnectSlack}>Connect Slack</button>
       </div>
     </div>
   );
