@@ -46,16 +46,6 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
       throw new ApiError('Missing state parameter', 400);
     }
 
-    // Safely get the JWT secret from env variables
-    const jwtSecret = getEnvVar('API_JWT_SECRET');
-
-    // Verify JWT token from state param
-    const payload = jwt.verify(state, jwtSecret) as JwtPayload;
-
-    // Now you can access payload properties, e.g. payload.id, payload.email, etc.
-    console.log('Decoded JWT payload:', payload);
-
-    // Redirect or continue your logic
     return res.redirect(`/slack/oauth-callback?code=${encodeURIComponent(code)}`);
   } catch (error) {
     next(error);
