@@ -77,7 +77,7 @@ export async function saveSlackToken(req: Request, res: Response, next: NextFunc
     }
 
     // userId should be in the JWT’s payload (e.g. { userId: '…', iat, exp })
-    const userId = payload.userId as string;
+    const userId = payload.id as string;
     if (!userId) {
       throw new ApiError('Invalid JWT payload: no userId', 400);
     }
