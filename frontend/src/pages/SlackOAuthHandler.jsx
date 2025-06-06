@@ -1,44 +1,40 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../services/api';
-
-function isString(value) {
-  return typeof value === 'string';
-}
+import Modal from '../components/Modal';
 
 export default function SlackOAuthHandler() {
-  const [status, setStatus] = useState('loading');
-  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+  const [modal, setModal] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const state = params.get('state');
-
-    if (!isString(code) || !code || !isString(state) || !state) {
-      setStatus('error');
-      setMessage('Invalid or missing OAuth code or user token in URL');
+    if (!code || !state) {
+      setModal({ title: 'Error', message: 'Missing OAuth parameters.' });
       return;
     }
-
-    async function saveToken() {
-      try {
-        const response = await apiClient.get('/slack/save-token', {
-          params: { code, userToken: state },
-        });
-
-        setStatus('success');
-        setMessage(response?.data?.message || 'Slack connected successfully!');
-      } catch (err) {
-        setStatus('error');
-        setMessage(err?.response?.data?.message || err.message || 'An error occurred');
-      }
-    }
-
-    saveToken();
+    apiClient
+      .get('/slack/save-token', { params: { code, userToken: state } })
+      .then((res) => {
+        setModal({ title: 'Success', message: res.data.message || 'Connected!' });
+      })
+      .catch((err) => {
+        setModal({ title: 'Error', message: err.response?.data?.message || err.message });
+      });
   }, []);
 
-  if (status === 'loading') return <div>Connecting to Slack...</div>;
-  if (status === 'error') return <div style={{ color: 'red' }}>Error: {message}</div>;
-
-  return <div style={{ color: 'green' }}>{message}</div>;
+  if (modal) {
+    return (
+      <Modal
+        title={modal.title}
+        message={modal.message}
+        onClose={() => {
+          navigate('/slack');
+        }}
+      />
+    );
+  }
+  return null;
 }
