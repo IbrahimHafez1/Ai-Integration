@@ -37,6 +37,10 @@ dotenv.config();
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const frontendPath = path.resolve(__dirname, '../../frontend/dist');
 
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+
   app.use(express.static(frontendPath));
 
   app.use(errorHandler);
