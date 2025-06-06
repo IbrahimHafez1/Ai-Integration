@@ -24,7 +24,6 @@ export default function SlackOAuthHandler() {
       try {
         const response = await apiClient.get('/slack/save-token', {
           params: { code, userToken: state },
-          withCredentials: true,
         });
 
         setStatus('success');
