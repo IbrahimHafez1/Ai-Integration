@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import apiClient from '../services/api';
 
 function isString(value) {
   return typeof value === 'string';
@@ -20,21 +21,16 @@ export default function SlackOAuthHandler() {
 
     async function saveToken() {
       try {
-        const response = await fetch(`/api/slack/save-token?code=${encodeURIComponent(code)}`, {
-          method: 'GET',
-          credentials: 'include',
+        const response = await apiClient.get(`/slack/save-token`, {
+          params: { code },
+          withCredentials: true,
         });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText || 'Failed to save Slack token');
-        }
-
         setStatus('success');
-        setMessage('Slack connected successfully!');
+        setMessage(response?.data?.message || 'Slack connected successfully!');
       } catch (err) {
         setStatus('error');
-        setMessage(err.message || 'An error occurred');
+        setMessage(err?.response?.data?.message || err.message || 'An error occurred');
       }
     }
 
