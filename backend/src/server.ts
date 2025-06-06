@@ -34,6 +34,14 @@ dotenv.config();
 
   app.use('/api', router);
 
+  app.use('/api', (req, res, next) => {
+    res.status(404).json({
+      success: false,
+      data: null,
+      message: 'API route not found',
+    });
+  });
+
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   // Serve static files from frontend build
   app.use(express.static(path.join(__dirname, '../../frontend/dist')));
