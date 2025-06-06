@@ -3,6 +3,7 @@ import axios from 'axios';
 import { OAuthToken } from '../models/OAuthToken.js';
 import { ApiError } from '../utils/errors.js';
 import config from '../config/index.js';
+import { User } from '../models/User.js';
 
 /**
  * Exchange Slack “code” for tokens, then upsert into Mongo.
@@ -38,7 +39,13 @@ export async function exchangeSlackCodeAndSave(userId: string, code: string) {
   };
   const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-  const tokenDoc = await OAuthToken.findOneAndUpdate(filter, update, options);
+  const [tokenDoc] = await Promise.all([
+    // Upsert the OAuthToken document
+    OAuthToken.findOneAndUpdate(filter, update, options).lean(),
+    // Store the raw Slack access token on the User model
+    User.findByIdAndUpdate(userId, { slackAccessToken: access_token }),
+  ]);
+
   return tokenDoc;
 }
 
