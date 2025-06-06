@@ -44,15 +44,10 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
     if (!isString(state)) {
       throw new ApiError('Missing state parameter', 400);
     }
-    console.log(
-      `${config.frontendBaseUrl}/slack/callback?` +
-        `code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
-    );
+
     // Redirect to the front‐end SlackOAuthHandler with both code & state:
-    return res.redirect(
-      `${config.frontendBaseUrl}/slack/callback?` +
-        `code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
-    );
+    const redirectUrl = `${config.frontendBaseUrl}/slack/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+    return res.redirect(redirectUrl);
   } catch (error) {
     next(error);
   }

@@ -35,13 +35,9 @@ dotenv.config();
   app.use('/api', router);
 
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  // Serve static files from frontend build
-  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+  const frontendPath = path.resolve(__dirname, '../../frontend/dist');
 
-  // Catch-all handler for React Router
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve('../../frontend/dist/index.html'));
-  });
+  app.use(express.static(frontendPath));
 
   app.use(errorHandler);
 
