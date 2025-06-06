@@ -22,7 +22,7 @@ export default function SlackOAuthHandler() {
 
     async function saveToken() {
       try {
-        const response = await apiClient.get('/slack/save-token', {
+        const response = await apiClient.get('/api/slack/save-token', {
           params: { code, userToken: state },
         });
 
