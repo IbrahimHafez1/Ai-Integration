@@ -47,7 +47,7 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
     }
 
     // Safely get the JWT secret from env variables
-    const jwtSecret = getEnvVar('JWT_SECRET');
+    const jwtSecret = getEnvVar('API_JWT_SECRET');
 
     // Verify JWT token from state param
     const payload = jwt.verify(state, jwtSecret) as JwtPayload;
