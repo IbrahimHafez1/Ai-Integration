@@ -42,13 +42,13 @@ dotenv.config();
     });
   });
 
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  // Serve static files from frontend build
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
   app.use(express.static(path.join(__dirname, '../../Dragify-Task/frontend/dist')));
 
-  // Catch-all handler for React Router
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve('../../Dragify-Task/frontend/dist/index.html'));
+    res.sendFile(path.join(__dirname, '../../Dragify-Task/frontend/dist', 'index.html'));
   });
 
   app.use(errorHandler);
