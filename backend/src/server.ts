@@ -34,21 +34,13 @@ dotenv.config();
 
   app.use('/api', router);
 
-  app.use('/api', (req, res, next) => {
-    res.status(404).json({
-      success: false,
-      data: null,
-      message: 'API route not found',
-    });
-  });
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  // Serve static files from frontend build
+  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
-  app.use(express.static(path.join(__dirname, '../../Dragify-Task/frontend/dist')));
-
+  // Catch-all handler for React Router
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../Dragify-Task/frontend/dist', 'index.html'));
+    res.sendFile(path.resolve('../../frontend/dist/index.html'));
   });
 
   app.use(errorHandler);
