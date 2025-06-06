@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import config from '../config/index.js';
 import { exchangeSlackCodeAndSave } from '../services/slackOAuthService.js';
 import { ApiError } from '../utils/errors.js';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 /**
  * Redirect user to Slack OAuth v2 authorize page.
@@ -58,24 +59,35 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
  * Exchanges the Slack OAuth code for an access token and saves it to the user.
  * Requires authenticated user (req.user) and OAuth code in query.
  */
-export async function saveSlackToken(
-  req: Request & { user?: { _id?: string } },
-  res: Response,
-  next: NextFunction,
-) {
+export async function saveSlackToken(req: Request, res: Response, next: NextFunction) {
   try {
     const code = req.query.code;
-    const userId = req.user?._id;
+    const userToken = req.query.userToken;
 
-    if (!isString(code) || !userId) {
-      throw new ApiError('Missing OAuth code or user authentication', 400);
+    if (!isString(code) || !isString(userToken)) {
+      throw new ApiError('Missing OAuth code or user token', 400);
     }
 
+    // Verify & decode the JWT that was passed in `state`
+    let payload: JwtPayload;
+    try {
+      payload = jwt.verify(userToken, process.env.API_JWT_SECRET!) as JwtPayload;
+    } catch {
+      throw new ApiError('Invalid user token', 401);
+    }
+
+    // userId should be in the JWT’s payload (e.g. { userId: '…', iat, exp })
+    const userId = payload.userId as string;
+    if (!userId) {
+      throw new ApiError('Invalid JWT payload: no userId', 400);
+    }
+
+    // Now exchange the Slack code for a token and save it
     await exchangeSlackCodeAndSave(userId, code);
 
     res.json({ success: true, message: 'Slack connected successfully!' });
     return;
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 }
