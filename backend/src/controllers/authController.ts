@@ -29,7 +29,7 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
       throw new ApiError('Invalid or missing OAuth code', 400);
     }
 
-    return res.redirect(`/slack/save-token?code=${encodeURIComponent(code)}`);
+    return res.redirect(`/slack/oauth-callback?code=${encodeURIComponent(code)}`);
   } catch (error) {
     next(error);
   }
