@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import config from '../config/index.js';
 import { exchangeSlackCodeAndSave } from '../services/slackOAuthService.js';
 import { ApiError } from '../utils/errors.js';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 /**
  * Redirect user to Slack OAuth v2 authorize page.
@@ -26,19 +27,35 @@ function isString(value: unknown): value is string {
   return typeof value === 'string';
 }
 
-/**
- * Handles Slack OAuth callback.
- * Extracts 'code' query param and redirects to frontend callback route.
- */
+// Helper to get env variable or throw
+function getEnvVar(name: string): string {
+  const val = process.env[name];
+  if (!val) throw new Error(`Missing environment variable: ${name}`);
+  return val;
+}
+
 export async function handleSlackCallback(req: Request, res: Response, next: NextFunction) {
   try {
-    const code = req.query.code;
+    const { code, state } = req.query;
 
-    if (!isString(code)) {
+    if (typeof code !== 'string') {
       throw new ApiError('Invalid or missing OAuth code', 400);
     }
 
-    // Redirect to frontend route where the code can be exchanged for token
+    if (typeof state !== 'string') {
+      throw new ApiError('Missing state parameter', 400);
+    }
+
+    // Safely get the JWT secret from env variables
+    const jwtSecret = getEnvVar('JWT_SECRET');
+
+    // Verify JWT token from state param
+    const payload = jwt.verify(state, jwtSecret) as JwtPayload;
+
+    // Now you can access payload properties, e.g. payload.id, payload.email, etc.
+    console.log('Decoded JWT payload:', payload);
+
+    // Redirect or continue your logic
     return res.redirect(`/slack/oauth-callback?code=${encodeURIComponent(code)}`);
   } catch (error) {
     next(error);
