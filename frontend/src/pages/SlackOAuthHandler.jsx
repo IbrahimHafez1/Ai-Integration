@@ -20,7 +20,7 @@ export default function SlackOAuthHandler() {
 
     async function saveToken() {
       try {
-        const response = await fetch(`/slack/save-token?code=${encodeURIComponent(code)}`, {
+        const response = await fetch(`/api/slack/save-token?code=${encodeURIComponent(code)}`, {
           method: 'GET',
           credentials: 'include',
         });
