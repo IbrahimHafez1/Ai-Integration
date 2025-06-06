@@ -30,14 +30,11 @@ export async function exchangeSlackCodeAndSave(userId: string, code: string) {
     throw new ApiError(`Slack OAuth failed: ${resp.data.error}`, 400);
   }
 
-  const { access_token, refresh_token, expires_in } = resp.data;
-  const expiresAt = expires_in ? new Date(Date.now() + expires_in * 1000) : undefined;
+  const { access_token } = resp.data;
 
   const filter = { userId, provider: 'slack' };
   const update = {
     accessToken: access_token,
-    ...(refresh_token && { refreshToken: refresh_token }),
-    ...(expiresAt && { expiresAt }),
   };
   const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 

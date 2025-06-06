@@ -5,6 +5,7 @@ export interface IOAuthToken extends Document {
   accessToken: string;
   refreshToken?: string;
   expiresAt?: Date;
+  provider: string;
 }
 
 const oauthTokenSchema = new Schema<IOAuthToken>(
@@ -13,6 +14,7 @@ const oauthTokenSchema = new Schema<IOAuthToken>(
     accessToken: { type: String, required: true },
     refreshToken: { type: String },
     expiresAt: { type: Date },
+    provider: { type: String, required: true },
   },
   { timestamps: true },
 );
