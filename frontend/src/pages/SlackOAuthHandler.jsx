@@ -12,7 +12,7 @@ export default function SlackOAuthHandler() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-    const state = params.get('state'); // this is your JWT token
+    const state = params.get('state');
 
     if (!isString(code) || !code || !isString(state) || !state) {
       setStatus('error');
