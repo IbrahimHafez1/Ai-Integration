@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
-import SlackIntegration from './pages/SlackIntegration';
+import SlackOAuthHandler from './pages/SlackOAuthHandler';
 import LeadLogs from './pages/LeadLogs';
 import CRMLogs from './pages/CRMLogs';
 import TriggerConfigs from './pages/TriggerConfigs';
@@ -83,7 +83,7 @@ export default function App() {
           path="/slack"
           element={
             <PrivateRoute>
-              <SlackIntegration />
+              <SlackOAuthHandler />
             </PrivateRoute>
           }
         />
