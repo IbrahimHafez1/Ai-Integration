@@ -14,14 +14,8 @@ const oauth2Client = new OAuth2Client(
 export const redirectToGoogle = (_req: Request, res: Response): void => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: [
-      'profile',
-      'email',
-      'https://www.googleapis.com/auth/gmail.send',
-      'https://www.googleapis.com/auth/gmail.compose',
-    ],
+    scope: ['profile', 'email'],
     prompt: 'consent',
-    include_granted_scopes: true,
   });
   res.redirect(url);
 };
