@@ -3,7 +3,7 @@ import axios from 'axios';
 import { OAuthToken } from '../models/OAuthToken.js';
 import { ApiError } from '../utils/errors.js';
 import config from '../config/index.js';
-import { User } from '../models/User.js';
+import User from '../models/User.js';
 
 /**
  * Exchange Slack “code” for tokens, then upsert into Mongo.

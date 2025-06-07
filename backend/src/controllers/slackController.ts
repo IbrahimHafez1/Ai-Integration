@@ -3,7 +3,7 @@ import { TriggerConfig } from '../models/TriggerConfig.js';
 import { LeadLog } from '../models/LeadLog.js';
 import { logger } from '../utils/logger.js';
 import { runSlackFlow } from '../services/orchestrationService.js';
-import { User } from '../models/User.js';
+import User from '../models/User.js';
 
 export async function handleSlackEvents(req: Request, res: Response): Promise<void> {
   try {
@@ -64,7 +64,7 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
           eventType,
         });
 
-        await runSlackFlow({ leadLog, slackEvent: event }).catch((err) =>
+        await runSlackFlow({ leadLog }).catch((err) =>
           logger.error('Error running Slack flow:', err),
         );
       }

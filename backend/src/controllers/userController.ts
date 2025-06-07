@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../models/User.js';
+import User, { IUser } from '../models/User.js';
 import config from '../config/index.js';
 import { sendSuccess } from '../utils/response.js';
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
@@ -38,12 +38,12 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       throw new ApiError('Invalid credentials', 401);
     }
 
-    const userDoc = await User.findById(user._id);
+    const userDoc = (await User.findById(user._id)) as IUser;
     if (!userDoc) {
       throw new ApiError('Invalid credentials', 401);
     }
 
-    const isMatch = await userDoc.comparePassword(password);
+    const isMatch = await userDoc!.comparePassword(password);
     if (!isMatch) {
       throw new ApiError('Invalid credentials', 401);
     }

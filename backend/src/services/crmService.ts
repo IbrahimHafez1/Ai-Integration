@@ -44,7 +44,7 @@ export async function createLead(leadData: ZohoPayload) {
   });
 
   // 2. Call Zoho CRM create record endpoint
-  const url = `https://www.zohoapis.com/crm/v2/Leads}`;
+  const url = `https://www.zohoapis.com/crm/v2/Leads`;
   const headers = {
     Authorization: `Zoho-oauthtoken ${accessToken}`,
     'Content-Type': 'application/json',

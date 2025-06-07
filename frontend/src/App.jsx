@@ -11,6 +11,7 @@ import SlackOAuthHandler from './pages/SlackOAuthHandler';
 import LeadLogs from './pages/LeadLogs';
 import CRMLogs from './pages/CRMLogs';
 import TriggerConfigs from './pages/TriggerConfigs';
+import GoogleConnectPage from './pages/Google';
 
 function PrivateRoute({ children }) {
   const { token } = useContext(AuthContext);
@@ -37,6 +38,10 @@ export default function App() {
               </Link>
               <Link to="/slack" className="nav-link">
                 Slack
+              </Link>
+
+              <Link to="/connect/google" className="nav-link">
+                Google
               </Link>
               <Link to="/logs/leads" className="nav-link">
                 Lead Logs
@@ -108,6 +113,8 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
+        <Route path="/connect/google" element={<GoogleConnectPage />} />
 
         <Route
           path="/triggers"
