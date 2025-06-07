@@ -15,7 +15,7 @@ export const redirectToGoogle = (_req: Request, res: Response): void => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: ['profile', 'email'],
-    prompt: 'consent',
+    prompt: 'select_account',
   });
   res.redirect(url);
 };
