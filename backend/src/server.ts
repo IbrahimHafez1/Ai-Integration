@@ -28,18 +28,29 @@ dotenv.config();
     }),
   );
 
+  // Replace with your production frontend domain
+  const allowedOrigins = [
+    'https://5d0c739d-620b-4833-b270-6da5909ef27a-00-38en1hwbeb1oi.kirk.replit.dev',
+  ];
+
   app.use(
     cors({
       origin: (origin, callback) => {
+        // Allow requests with no origin (server-to-server, curl, etc)
         if (!origin) return callback(null, true);
-        return callback(null, origin);
+
+        // Check if origin is in allowed list
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, origin);
+        }
+
+        return callback(new Error('Not allowed by CORS'));
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
     }),
   );
-
   app.use(express.json());
   app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
