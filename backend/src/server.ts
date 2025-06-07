@@ -30,11 +30,16 @@ dotenv.config();
 
   app.use(
     cors({
-      origin: '*',
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        return callback(null, origin);
+      },
+      credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
     }),
   );
+
   app.use(express.json());
   app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
