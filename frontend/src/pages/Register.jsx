@@ -10,15 +10,22 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     try {
       await register(name.trim(), email.trim(), password);
-      navigate('/profile');
+      setSuccess('Registration successful! Redirecting to login...');
+      navigate('/login');
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      if (err.response?.status === 409) {
+        setError('User already exists. Please login instead.');
+      } else {
+        setError(err.message || 'Registration failed');
+      }
     }
   };
 
@@ -29,7 +36,10 @@ export default function Register() {
           <h1>Dragify</h1>
         </div>
         <h2>Create Your Account</h2>
+
         {error && <div className="auth-error">{error}</div>}
+        {success && <div className="auth-success">{success}</div>}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -39,6 +49,7 @@ export default function Register() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={!!success}
             />
             <label htmlFor="name">Full Name</label>
           </div>
@@ -51,6 +62,7 @@ export default function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={!!success}
             />
             <label htmlFor="email">Email Address</label>
           </div>
@@ -63,11 +75,12 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={!!success}
             />
             <label htmlFor="password">Password</label>
           </div>
 
-          <button type="submit" className="auth-btn">
+          <button type="submit" className="auth-btn" disabled={!!success}>
             Register
           </button>
         </form>

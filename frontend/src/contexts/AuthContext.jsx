@@ -40,11 +40,9 @@ export default function AuthProvider({ children }) {
   };
 
   const register = async (name, email, password) => {
-    const { token: newToken } = await apiRegister(name, email, password);
-    setToken(newToken);
-    localStorage.setItem('jwtToken', newToken);
-    const userData = await apiGetProfile(newToken);
-    setUser(userData);
+    const { token } = await apiRegister(name, email, password);
+    setToken(token);
+    localStorage.setItem('jwtToken', token);
   };
 
   const logout = () => {
