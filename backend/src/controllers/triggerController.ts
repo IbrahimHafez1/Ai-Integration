@@ -24,6 +24,7 @@ export async function createTriggerConfig(req: any, res: Response): Promise<void
         message: 'Trigger already exists for this channel',
         data: null,
       });
+      return;
     }
 
     const newTrigger = await TriggerConfig.create({
