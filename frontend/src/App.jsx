@@ -10,7 +10,6 @@ import SlackIntegration from './pages/SlackIntegration';
 import SlackOAuthHandler from './pages/SlackOAuthHandler';
 import LeadLogs from './pages/LeadLogs';
 import CRMLogs from './pages/CRMLogs';
-import TriggerConfigs from './pages/TriggerConfigs';
 
 function PrivateRoute({ children }) {
   const { token } = useContext(AuthContext);
@@ -43,9 +42,6 @@ export default function App() {
               </Link>
               <Link to="/logs/crm" className="nav-link">
                 CRM Logs
-              </Link>
-              <Link to="/triggers" className="nav-link">
-                Triggers
               </Link>
               <button onClick={logout} className="nav-button">
                 Logout
@@ -105,15 +101,6 @@ export default function App() {
           element={
             <PrivateRoute>
               <CRMLogs />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/triggers"
-          element={
-            <PrivateRoute>
-              <TriggerConfigs />
             </PrivateRoute>
           }
         />

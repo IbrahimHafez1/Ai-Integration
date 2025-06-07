@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { TriggerConfig } from '../models/TriggerConfig.js';
 import { LeadLog } from '../models/LeadLog.js';
 import { logger } from '../utils/logger.js';
 import { runSlackFlow } from '../services/orchestrationService.js';
@@ -41,21 +40,6 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
 
       if (eventType === 'message' && !bot_id && text && channel && user) {
         logger.info(`Slack message received: ${text} (from ${user} in ${channel})`);
-
-        const triggerConfig = await TriggerConfig.findOne({
-          'settings.channelId': channel,
-          isActive: true,
-        }).lean();
-
-        if (!triggerConfig) {
-          logger.info(`No active trigger found for channel ${channel}`);
-          res.status(200).json({
-            success: true,
-            data: null,
-            message: 'No active trigger for this channel',
-          });
-          return;
-        }
 
         const leadLog = await LeadLog.create({
           text,
