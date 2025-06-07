@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getCRMLogs } from '../services/logService';
-import './crmLogs.css'; // Import the new CSS file
+import './crmLogs.css';
 
 export default function CRMLogs() {
   const [logs, setLogs] = useState([]);
@@ -9,12 +9,20 @@ export default function CRMLogs() {
   useEffect(() => {
     async function fetchLogs() {
       try {
-        const data = await getCRMLogs();
-        setLogs(data);
+        const response = await getCRMLogs();
+
+        // Check if response is a valid array
+        if (Array.isArray(response)) {
+          setLogs(response);
+        } else {
+          throw new Error('Unexpected response format');
+        }
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'Failed to fetch CRM logs');
+        setLogs([]);
       }
     }
+
     fetchLogs();
   }, []);
 
@@ -34,15 +42,16 @@ export default function CRMLogs() {
               </tr>
             </thead>
             <tbody>
-              {logs.map((log) => (
-                <tr key={log._id}>
-                  <td>{log._id}</td>
-                  <td>{log.leadLogId}</td>
-                  <td>{log.status}</td>
-                  <td>{new Date(log.createdAt).toLocaleString()}</td>
-                </tr>
-              ))}
-              {logs.length === 0 && (
+              {logs.length > 0 ? (
+                logs.map((log) => (
+                  <tr key={log._id}>
+                    <td>{log._id}</td>
+                    <td>{log.leadLogId}</td>
+                    <td>{log.status}</td>
+                    <td>{new Date(log.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
                   <td colSpan="4" className="crm-logs-empty">
                     No logs found

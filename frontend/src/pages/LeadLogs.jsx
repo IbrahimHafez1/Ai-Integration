@@ -9,12 +9,19 @@ export default function LeadLogs() {
   useEffect(() => {
     async function fetchLogs() {
       try {
-        const data = await getLeadLogs();
-        setLogs(data);
+        const response = await getLeadLogs();
+
+        if (Array.isArray(response)) {
+          setLogs(response);
+        } else {
+          throw new Error('Unexpected response format');
+        }
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'Failed to fetch logs');
+        setLogs([]);
       }
     }
+
     fetchLogs();
   }, []);
 
@@ -36,17 +43,18 @@ export default function LeadLogs() {
               </tr>
             </thead>
             <tbody>
-              {logs.map((log) => (
-                <tr key={log._id}>
-                  <td>{log._id}</td>
-                  <td>{log.slackUserId}</td>
-                  <td>{log.channelId}</td>
-                  <td>{log.eventType}</td>
-                  <td>{log.text}</td>
-                  <td>{new Date(log.createdAt).toLocaleString()}</td>
-                </tr>
-              ))}
-              {logs.length === 0 && (
+              {logs.length > 0 ? (
+                logs.map((log) => (
+                  <tr key={log._id}>
+                    <td>{log._id}</td>
+                    <td>{log.slackUserId}</td>
+                    <td>{log.channelId}</td>
+                    <td>{log.eventType}</td>
+                    <td>{log.text}</td>
+                    <td>{new Date(log.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
                   <td colSpan="6" className="lead-logs-empty">
                     No logs found
