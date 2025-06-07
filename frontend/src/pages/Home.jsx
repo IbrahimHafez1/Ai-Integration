@@ -10,8 +10,8 @@ export default function Home() {
       <div className="hero-card">
         <h1 className="hero-title">Welcome to Dragify</h1>
         <p className="hero-subtitle">
-          Dragify lets you seamlessly integrate Slack leads into Zoho CRM, get email notifications
-          via Gmail OAuth, and manage your trigger configurations all from a single dashboard.
+          Dragify lets you seamlessly integrate Slack leads into Zoho CRM, get email notifications,
+          and manage your trigger configurations all from a single dashboard.
         </p>
 
         <div className="hero-buttons">
