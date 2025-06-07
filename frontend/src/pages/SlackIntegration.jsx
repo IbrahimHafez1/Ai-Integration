@@ -13,7 +13,7 @@ export default function SlackIntegration() {
   useEffect(() => {
     async function checkConnection() {
       try {
-        const resp = await checkSlackConnection();
+        const resp = await checkSlackConnection(token);
         setConnected(resp.data.connected);
       } catch (err) {
         setError('Failed to fetch connection status');

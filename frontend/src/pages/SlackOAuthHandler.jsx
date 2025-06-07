@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import apiClient from '../services/api';
 import Modal from '../components/Modal';
+import { AuthContext } from '../contexts/AuthContext';
+import axios from 'axios';
 
 export default function SlackOAuthHandler() {
   const navigate = useNavigate();
   const [modal, setModal] = useState(null);
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -15,8 +17,16 @@ export default function SlackOAuthHandler() {
       setModal({ title: 'Error', message: 'Missing OAuth parameters.' });
       return;
     }
-    apiClient
-      .get('/slack/save-token', { params: { code, userToken: state } })
+    axios
+      .get('/slack/save-token', {
+        params: {
+          code,
+          userToken: state,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((res) => {
         setModal({ title: 'Success', message: res.data.message || 'Connected!' });
       })

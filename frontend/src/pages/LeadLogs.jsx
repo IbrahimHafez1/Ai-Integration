@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getLeadLogs } from '../services/logService';
 import './LeadLogs.css'; // Import the CSS file
+import { AuthContext } from '../contexts/AuthContext';
 
 export default function LeadLogs() {
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState('');
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     async function fetchLogs() {
       try {
-        const response = await getLeadLogs();
+        const response = await getLeadLogs(token);
 
         if (Array.isArray(response)) {
           setLogs(response);

@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getCRMLogs } from '../services/logService';
 import './crmLogs.css';
+import { AuthContext } from '../contexts/AuthContext';
 
 export default function CRMLogs() {
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState('');
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     async function fetchLogs() {
       try {
-        const response = await getCRMLogs();
+        const response = await getCRMLogs(token);
 
         // Check if response is a valid array
         if (Array.isArray(response)) {
