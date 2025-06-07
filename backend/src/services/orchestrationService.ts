@@ -1,5 +1,5 @@
 import { CRMStatusLog } from '../models/CRMStatusLog.js';
-import { sendEmail } from './emailService.js';
+import { sendMail } from './emailService.js';
 import { logger } from '../utils/logger.js';
 import { createLead } from './crmService.js';
 
@@ -36,22 +36,19 @@ export async function runSlackFlow({ leadLog }: { leadLog: any }) {
       logger.error(`Failed to create CRMStatusLog for LeadLog ${leadLog._id}:`, logError);
     }
 
-    // 2) Send notification email only if log was created
     if (logCreated) {
       try {
         const recipientEmail = process.env.NOTIFY_EMAIL!;
 
-        const email = await sendEmail({
+        await sendMail({
           to: recipientEmail,
           subject: isSuccess
             ? 'New Zoho Lead Created'
             : `Zoho Lead Creation FAILED for ${leadLog._id}`,
-          body: isSuccess
+          text: isSuccess
             ? `Lead ID ${crmResult.id} created for ${firstName} ${lastName}.`
             : `Error: ${crmResult.raw?.error || crmResult.message || 'Unknown error'}`,
-          providerConfig: { provider: 'gmail', email: recipientEmail },
         });
-        console.log({ email });
       } catch (emailErr) {
         logger.error(`Failed to send SlackFlow email for LeadLog ${leadLog._id}:`, emailErr);
       }

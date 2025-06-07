@@ -1,4 +1,3 @@
-// services/email.service.js
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import { ApiError } from '../utils/errors.js';
@@ -38,7 +37,6 @@ export async function sendMail({ to, subject, html, text }: any) {
     html,
   };
 
-  // sendMail returns a promise
   const info = await transporter.sendMail(mailOptions);
   return {
     messageId: info.messageId,
