@@ -1,52 +1,48 @@
+// services/email.service.js
 import nodemailer from 'nodemailer';
-import { google } from 'googleapis';
-import tokenService from './tokenService.js';
-import config from '../config/index.js';
+import dotenv from 'dotenv';
+import { ApiError } from '../utils/errors.js';
 
-export interface EmailOptions {
-  to: string;
-  subject: string;
-  body: string;
-  providerConfig: { provider: 'gmail'; email: string };
+dotenv.config();
+
+const { EMAIL_HOST, EMAIL_PORT, EMAIL_SECURE, EMAIL_USER, EMAIL_PASS, EMAIL_FROM } = process.env;
+
+if (!EMAIL_HOST || !EMAIL_PORT || !EMAIL_USER || !EMAIL_PASS || !EMAIL_FROM) {
+  console.error('Missing one or more EMAIL_* env vars');
+  process.exit(1);
 }
 
-export async function sendEmail(options: EmailOptions): Promise<any> {
-  const { to, subject, body, providerConfig } = options;
+const transporter = nodemailer.createTransport({
+  host: EMAIL_HOST,
+  port: Number(EMAIL_PORT),
+  secure: EMAIL_SECURE === 'true',
+  auth: {
+    user: EMAIL_USER,
+    pass: EMAIL_PASS,
+  },
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+});
 
-  const tokenDoc = await tokenService.getTokens('google', providerConfig.email);
-  if (!tokenDoc || !tokenDoc.refreshToken) {
-    throw new Error(`No valid Gmail tokens for user ${providerConfig.email}`);
+export async function sendMail({ to, subject, html, text }: any) {
+  if (!to || !subject || (!html && !text)) {
+    throw new ApiError('Missing required email parameters');
   }
 
-  const oAuth2Client = new google.auth.OAuth2(
-    config.oauth.google.clientId,
-    config.oauth.google.clientSecret,
-    config.oauth.google.redirectUri,
-  );
-  oAuth2Client.setCredentials({ refresh_token: tokenDoc.refreshToken });
-
-  const { token: accessToken } = await oAuth2Client.getAccessToken();
-  if (!accessToken) throw new Error('Failed to refresh Gmail access token');
-
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      type: 'OAuth2',
-      user: providerConfig.email,
-      clientId: config.oauth.google.clientId,
-      clientSecret: config.oauth.google.clientSecret,
-      refreshToken: tokenDoc.refreshToken,
-      accessToken,
-    },
-  });
-
   const mailOptions = {
-    from: `No-Reply <${providerConfig.email}>`,
+    from: EMAIL_FROM,
     to,
     subject,
-    text: body,
-    html: `<p>${body}</p>`,
+    text,
+    html,
   };
 
-  return transporter.sendMail(mailOptions);
+  // sendMail returns a promise
+  const info = await transporter.sendMail(mailOptions);
+  return {
+    messageId: info.messageId,
+    accepted: info.accepted,
+    rejected: info.rejected,
+  };
 }

@@ -7,13 +7,11 @@ export interface IUser extends Document {
   password: string;
   isActive: boolean;
   slackAccessToken?: string;
-  googleId?: string;
   comparePassword(candidate: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser>(
   {
-    googleId: { type: String, unique: true },
     email: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
     password: { type: String, required: true },
