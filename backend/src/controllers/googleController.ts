@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { OAuth2Client, TokenPayload } from 'google-auth-library';
+import { OAuth2Client } from 'google-auth-library';
 import config from '../config/index.js';
-import { upsertUserFromGoogle, createJwtForUser } from '../services/googleAuthService.js';
 import { OAuthToken } from '../models/OAuthToken.js';
+import { createJwtForUser, upsertUserFromGoogle } from '../services/googleOAuthService.js';
+import { ApiError } from '../utils/errors.js';
 
 const oauth2Client = new OAuth2Client(
   config.oauth.google.clientId,
@@ -19,58 +20,53 @@ export const redirectToGoogle = (_req: Request, res: Response): void => {
   res.redirect(url);
 };
 
-export const handleGoogleCallback = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
+export const handleGoogleCallback = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const code = String(req.query.code);
     const { tokens } = await oauth2Client.getToken(code);
+
+    if (!tokens.refresh_token) {
+      throw new ApiError('Missing refresh_token. Re-authentication is required.', 400);
+    }
+
     oauth2Client.setCredentials(tokens);
 
-    const [ticket] = await Promise.all([
-      oauth2Client.verifyIdToken({
-        idToken: tokens.id_token!,
-        audience: config.oauth.google.clientId,
-      }),
-    ]);
+    const ticket = await oauth2Client.verifyIdToken({
+      idToken: tokens.id_token!,
+      audience: config.oauth.google.clientId,
+    });
+    const payload = ticket.getPayload();
 
-    const payload = ticket.getPayload() as TokenPayload;
+    if (!payload?.email || !payload?.sub) {
+      throw new ApiError('Invalid Google user payload', 400);
+    }
 
     const user = await upsertUserFromGoogle({
-      googleId: payload.sub!,
-      email: payload.email!,
-      name: payload.name!,
-      avatar: payload.picture!,
+      googleId: payload.sub,
+      email: payload.email,
+      name: payload.name || '',
     });
 
     const jwt = createJwtForUser(user);
 
-    await Promise.all([
-      OAuthToken.findOneAndUpdate(
-        { userId: user._id, provider: 'google' },
-        {
-          userId: user._id,
-          accessToken: tokens.access_token!,
-          refreshToken: tokens.refresh_token,
-          expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
-          provider: 'google',
-        },
-        { upsert: true, new: true },
-      ),
+    await OAuthToken.findOneAndUpdate(
+      { userId: user._id, provider: 'google' },
+      {
+        accessToken: tokens.access_token!,
+        refreshToken: tokens.refresh_token!,
+        expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+        provider: 'google',
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
 
-      new Promise((resolve) => {
-        res.cookie('token', jwt, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-        });
-        resolve(null);
-      }),
-    ]);
+    res.cookie('token', jwt, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    });
 
     res.redirect(`${config.frontendBaseUrl}/connect/google`);
   } catch (err) {
-    next(err as Error);
+    next(err);
   }
 };

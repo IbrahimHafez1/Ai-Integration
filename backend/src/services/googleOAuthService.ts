@@ -2,55 +2,19 @@ import axios from 'axios';
 import { OAuthToken, IOAuthToken } from '../models/OAuthToken.js';
 import { ApiError } from '../utils/errors.js';
 import config from '../config/index.js';
+import { Types } from 'mongoose';
+import UserModel, { IUser } from '../models/User.js';
+import { SignOptions, Secret } from 'jsonwebtoken';
+import pkg from 'jsonwebtoken';
 
-/**
- * Exchange a Google authorization code for tokens and save/update in MongoDB.
- * Scopes assumed to include "https://www.googleapis.com/auth/gmail.send" and/or others.
- */
-export async function exchangeGoogleCodeAndSave(
-  userId: string,
-  code: string,
-): Promise<IOAuthToken> {
-  const tokenUrl = 'https://oauth2.googleapis.com/token';
-  const params = {
-    client_id: config.oauth.google.clientId,
-    client_secret: config.oauth.google.clientSecret,
-    code,
-    grant_type: 'authorization_code',
-    redirect_uri: config.oauth.google.redirectUri,
-  };
+const { sign } = pkg;
 
-  let resp;
-  try {
-    resp = await axios.post(tokenUrl, new URLSearchParams(params).toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
-  } catch (error: any) {
-    throw new ApiError(`Google OAuth exchange error: ${error.message}`, 500);
-  }
-
-  if (resp.data.error) {
-    throw new ApiError(
-      `Google OAuth failed: ${resp.data.error_description || resp.data.error}`,
-      400,
-    );
-  }
-
-  const { access_token, refresh_token, expires_in } = resp.data;
-  const expiresAt = expires_in ? new Date(Date.now() + expires_in * 1000) : undefined;
-
-  // Upsert into OAuthToken collection with provider = "google"
-  const filter = { userId, provider: 'google' as const };
-  const update = { accessToken: access_token, refreshToken: refresh_token, expiresAt };
-  const options = { upsert: true, new: true, setDefaultsOnInsert: true };
-
-  const tokenDoc = await OAuthToken.findOneAndUpdate(filter, update, options).lean();
-  return tokenDoc as IOAuthToken;
+export interface GoogleUser {
+  googleId: string;
+  email: string;
+  name: string;
 }
 
-/**
- * Refresh a Google access token when expired, using the stored refresh token.
- */
 export async function refreshGoogleAccessToken(tokenDoc: IOAuthToken): Promise<string> {
   if (!tokenDoc.refreshToken) {
     throw new ApiError('No Google refresh token available', 400);
@@ -113,4 +77,22 @@ export async function getGmailAccessToken(
     throw new ApiError('No Google refresh token available', 400);
   }
   return { token: accessToken, refreshToken: tokenDoc.refreshToken };
+}
+
+export async function upsertUserFromGoogle(data: GoogleUser): Promise<IUser> {
+  const filter = { googleId: data.googleId };
+  const update = { email: data.email, name: data.name };
+  const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+  const user = await UserModel.findOneAndUpdate(filter, update, options).lean();
+  return user as IUser;
+}
+
+export function createJwtForUser(user: IUser): string {
+  const userId = (user._id as Types.ObjectId).toString();
+  const payload = { sub: userId, email: user.email };
+  const secret: Secret = config.jwt.secret;
+  const options: SignOptions = {
+    expiresIn: config.jwt.expiresIn as SignOptions['expiresIn'],
+  };
+  return sign(payload, secret, options);
 }
