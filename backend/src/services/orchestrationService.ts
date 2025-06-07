@@ -41,7 +41,7 @@ export async function runSlackFlow({ leadLog }: { leadLog: any }) {
       try {
         const recipientEmail = process.env.NOTIFY_EMAIL!;
 
-        await sendEmail({
+        const email = await sendEmail({
           to: recipientEmail,
           subject: isSuccess
             ? `New Zoho Lead Created: ${zohoPayload.Company}`
@@ -51,6 +51,7 @@ export async function runSlackFlow({ leadLog }: { leadLog: any }) {
             : `Error: ${crmResult.raw?.error || crmResult.message || 'Unknown error'}`,
           providerConfig: { provider: 'gmail', userId: recipientEmail },
         });
+        console.log({ email });
       } catch (emailErr) {
         logger.error(`Failed to send SlackFlow email for LeadLog ${leadLog._id}:`, emailErr);
       }

@@ -15,7 +15,7 @@ export interface GoogleUser {
 
 export async function upsertUserFromGoogle(data: GoogleUser): Promise<IUser> {
   const filter = { googleId: data.googleId };
-  const update = { email: data.email, name: data.name, avatar: data.avatar, lastLogin: new Date() };
+  const update = { email: data.email, name: data.name };
   const options = { upsert: true, new: true, setDefaultsOnInsert: true };
   const user = await UserModel.findOneAndUpdate(filter, update, options).lean();
   return user as IUser;
