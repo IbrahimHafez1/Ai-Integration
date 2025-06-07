@@ -36,21 +36,19 @@ dotenv.config();
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Allow requests with no origin (server-to-server, curl, etc)
-        if (!origin) return callback(null, true);
-
-        // Check if origin is in allowed list
-        if (allowedOrigins.includes(origin)) {
-          return callback(null, origin);
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, origin);
+        } else {
+          callback(new Error('Blocked by CORS'));
         }
-
-        return callback(new Error('Not allowed by CORS'));
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
+      exposedHeaders: ['Authorization', 'Set-Cookie'],
     }),
   );
+
   app.use(express.json());
   app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
