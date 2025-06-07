@@ -1,7 +1,10 @@
 import { Types } from 'mongoose';
 import UserModel, { IUser } from '../models/User.js';
-import { sign, SignOptions, Secret } from 'jsonwebtoken';
+import { SignOptions, Secret } from 'jsonwebtoken';
 import config from '../config/index.js';
+import pkg from 'jsonwebtoken';
+
+const { sign } = pkg;
 
 export interface GoogleUser {
   googleId: string;
