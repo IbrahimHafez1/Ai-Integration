@@ -18,10 +18,5 @@ export default {
       clientSecret: process.env.SLACK_CLIENT_SECRET as string,
       redirectUri: process.env.SLACK_REDIRECT_URI as string,
     },
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      redirectUri: process.env.GOOGLE_REDIRECT_URI as string,
-    },
   },
 };
