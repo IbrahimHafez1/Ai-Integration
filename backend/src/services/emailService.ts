@@ -7,15 +7,15 @@ export interface EmailOptions {
   to: string;
   subject: string;
   body: string;
-  providerConfig: { provider: 'gmail'; userId: string };
+  providerConfig: { provider: 'gmail'; email: string };
 }
 
 export async function sendEmail(options: EmailOptions): Promise<any> {
   const { to, subject, body, providerConfig } = options;
 
-  const tokenDoc = await tokenService.getTokens('google', providerConfig.userId);
+  const tokenDoc = await tokenService.getTokens('google', providerConfig.email);
   if (!tokenDoc || !tokenDoc.refreshToken) {
-    throw new Error(`No valid Gmail tokens for user ${providerConfig.userId}`);
+    throw new Error(`No valid Gmail tokens for user ${providerConfig.email}`);
   }
 
   const oAuth2Client = new google.auth.OAuth2(
@@ -23,30 +23,42 @@ export async function sendEmail(options: EmailOptions): Promise<any> {
     config.oauth.google.clientSecret,
     config.oauth.google.redirectUri,
   );
+
   oAuth2Client.setCredentials({ refresh_token: tokenDoc.refreshToken });
 
-  const { token: accessToken } = await oAuth2Client.getAccessToken();
-  if (!accessToken) throw new Error('Failed to refresh Gmail access token');
+  // Use Gmail API instead of nodemailer
+  const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      type: 'OAuth2',
-      user: providerConfig.userId,
-      clientId: config.oauth.google.clientId,
-      clientSecret: config.oauth.google.clientSecret,
-      refreshToken: tokenDoc.refreshToken,
-      accessToken,
-    },
-  });
+  // Create the email message
+  const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+  const messageParts = [
+    `From: ${providerConfig.email}`,
+    `To: ${to}`,
+    `Subject: ${utf8Subject}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=utf-8',
+    '',
+    body,
+  ];
 
-  const mailOptions = {
-    from: `No-Reply <${providerConfig.userId}>`,
-    to,
-    subject,
-    text: body,
-    html: `<p>${body}</p>`,
-  };
+  const message = messageParts.join('\n');
+  const encodedMessage = Buffer.from(message)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 
-  return transporter.sendMail(mailOptions);
+  try {
+    const result = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: encodedMessage,
+      },
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Gmail API send error:', error);
+    throw error;
+  }
 }

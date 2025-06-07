@@ -6,6 +6,8 @@ import { Types } from 'mongoose';
 import UserModel, { IUser } from '../models/User.js';
 import { SignOptions, Secret } from 'jsonwebtoken';
 import pkg from 'jsonwebtoken';
+import tokenService from './tokenService.js';
+import { google } from 'googleapis';
 
 const { sign } = pkg;
 
@@ -95,4 +97,36 @@ export function createJwtForUser(user: IUser): string {
     expiresIn: config.jwt.expiresIn as SignOptions['expiresIn'],
   };
   return sign(payload, secret, options);
+}
+
+export async function checkTokenScopes(email: string) {
+  const tokenDoc = await tokenService.getTokens('google', email);
+  if (!tokenDoc || !tokenDoc.refreshToken) {
+    throw new Error(`No valid Gmail tokens for user ${email}`);
+  }
+
+  const oAuth2Client = new google.auth.OAuth2(
+    config.oauth.google.clientId,
+    config.oauth.google.clientSecret,
+    config.oauth.google.redirectUri,
+  );
+
+  oAuth2Client.setCredentials({ refresh_token: tokenDoc.refreshToken });
+
+  try {
+    const oauth2 = google.oauth2({ version: 'v2', auth: oAuth2Client });
+    const tokenInfo = await oauth2.tokeninfo();
+    console.log('Current scopes:', tokenInfo.data.scope);
+
+    const hasRequiredScopes = [
+      'https://www.googleapis.com/auth/gmail.send',
+      'https://www.googleapis.com/auth/gmail.compose',
+    ].every((scope) => tokenInfo.data.scope?.includes(scope));
+
+    console.log('Has required scopes:', hasRequiredScopes);
+    return { scopes: tokenInfo.data.scope, hasRequiredScopes };
+  } catch (error) {
+    console.error('Error checking scopes:', error);
+    throw error;
+  }
 }

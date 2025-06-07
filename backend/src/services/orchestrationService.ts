@@ -44,12 +44,12 @@ export async function runSlackFlow({ leadLog }: { leadLog: any }) {
         const email = await sendEmail({
           to: recipientEmail,
           subject: isSuccess
-            ? `New Zoho Lead Created: ${zohoPayload.Company}`
+            ? 'New Zoho Lead Created'
             : `Zoho Lead Creation FAILED for ${leadLog._id}`,
           body: isSuccess
             ? `Lead ID ${crmResult.id} created for ${firstName} ${lastName}.`
             : `Error: ${crmResult.raw?.error || crmResult.message || 'Unknown error'}`,
-          providerConfig: { provider: 'gmail', userId: recipientEmail },
+          providerConfig: { provider: 'gmail', email: recipientEmail },
         });
         console.log({ email });
       } catch (emailErr) {
