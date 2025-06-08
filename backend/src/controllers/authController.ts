@@ -123,8 +123,7 @@ export const googleCallback: RequestHandler = async (req: any, res: Response): P
 
     await User.findOneAndUpdate({ _id: userId }, { googleAccessToken: token._id });
 
-    res.send('Google account linked successfully');
-    return;
+    return res.redirect(`${process.env.FRONTEND_BASE_URL}/integrations`);
   } catch (err) {
     console.error('Google OAuth error:', err);
     res.status(500).send('Authentication failed');
