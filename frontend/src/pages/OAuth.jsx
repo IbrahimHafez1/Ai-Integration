@@ -5,7 +5,7 @@ import './OAuth.css';
 import { redirectToGoogle, redirectToZoho, redirectToSlackOAuth } from '../services/oAuthService';
 
 export default function IntegrationsPage() {
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
   const [status, setStatus] = useState({ slack: null, google: null, zoho: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
