@@ -11,8 +11,8 @@ import { ensureAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/slack/', ensureAuth, redirectToSlack);
-router.get('/slack/callback', handleSlackCallback);
+router.get('/slack/', redirectToSlack);
+router.get('/slack/callback', ensureAuth, handleSlackCallback);
 
 router.get('/google/', ensureAuth, googleAuth);
 router.get('/google/callback', ensureAuth, googleCallback);
