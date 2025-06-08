@@ -2,10 +2,10 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import axios from 'axios';
 import './OAuth.css';
-import { redirectToGoogle, redirectToZoho, redirectToSlack } from '../services/oAuthService';
+import { redirectToGoogle, redirectToZoho, redirectToSlackOAuth } from '../services/oAuthService';
 
 export default function IntegrationsPage() {
-  const { token } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [status, setStatus] = useState({ slack: null, google: null, zoho: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,7 +41,7 @@ export default function IntegrationsPage() {
 
     switch (provider) {
       case 'slack':
-        redirectToSlack();
+        redirectToSlackOAuth(user);
         break;
       case 'google':
         redirectToGoogle();
