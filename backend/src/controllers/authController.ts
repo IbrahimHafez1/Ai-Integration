@@ -84,12 +84,7 @@ const googleOauth2Client = new google.auth.OAuth2(
 );
 
 export const googleAuth: RequestHandler = (req: any, res) => {
-  const userId = req.user?.id;
-  if (!userId) {
-    res.status(401).json({ message: 'Unauthorized' });
-    return;
-  }
-
+  const userId = req.query.userId;
   const state = encodeURIComponent(userId);
   const authUrl = googleOauth2Client.generateAuthUrl({
     access_type: 'offline',
