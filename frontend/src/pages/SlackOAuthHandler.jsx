@@ -19,7 +19,7 @@ export default function SlackOAuthHandler() {
       return;
     }
     axios
-      .get('/slack/save-token', {
+      .get('/api/slack/save-token', {
         params: {
           code,
           userId: state,
