@@ -3,7 +3,6 @@ import User from '../models/User.js';
 import { LeadLog } from '../models/LeadLog.js';
 import { logger } from '../utils/logger.js';
 import { runSlackFlow } from '../services/orchestrationService.js';
-import { OAuthToken } from '../models/OAuthToken.js';
 
 export async function handleSlackEvents(req: Request, res: Response): Promise<void> {
   try {

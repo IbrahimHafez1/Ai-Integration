@@ -34,7 +34,6 @@ export default function IntegrationsPage() {
       return;
     }
 
-    // Show modal confirmation
     const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
 
     setModal({
@@ -54,7 +53,6 @@ export default function IntegrationsPage() {
         redirectToZoho(user._id);
         break;
       default:
-        console.warn('Unknown provider:', provider);
         setModal({ visible: false, title: '', message: '' });
     }
   };
@@ -64,40 +62,28 @@ export default function IntegrationsPage() {
   };
 
   return (
-    <div className="profile-container">
-      <div className="profile-card">
-        <h2>Third-Party Integrations</h2>
-        {loading ? (
-          <div className="alert">Checking connections...</div>
-        ) : error ? (
-          <div className="alert error">{error}</div>
-        ) : (
-          <>
-            <div className="integration-item">
-              <span>Slack</span>
-              <span>{status.slack ? '✅ Connected' : '❌ Not connected'}</span>
-              <button onClick={() => handleConnect('slack')} className="connect-btn">
-                {status.slack ? 'Reconnect Slack' : 'Connect Slack'}
+    <div className="integration-container">
+      {loading ? (
+        <div className="status-alert status-neutral">Checking connections...</div>
+      ) : error ? (
+        <div className="status-alert status-error">{error}</div>
+      ) : (
+        <>
+          {['slack', 'google', 'zoho'].map((provider) => (
+            <div key={provider} className="integration-card">
+              <h2>{provider.charAt(0).toUpperCase() + provider.slice(1)}</h2>
+              <div
+                className={`status-alert ${status[provider] ? 'status-success' : 'status-neutral'}`}
+              >
+                {status[provider] ? '✅ Connected' : '❌ Not connected'}
+              </div>
+              <button onClick={() => handleConnect(provider)} className="connect-btn">
+                {status[provider] ? `Reconnect ${provider}` : `Connect ${provider}`}
               </button>
             </div>
-            <div className="integration-item">
-              <span>Google</span>
-              <span>{status.google ? '✅ Connected' : '❌ Not connected'}</span>
-              <button onClick={() => handleConnect('google')} className="connect-btn">
-                {status.google ? 'Reconnect Google' : 'Connect Google'}
-              </button>
-            </div>
-            <div className="integration-item">
-              <span>Zoho</span>
-              <span>{status.zoho ? '✅ Connected' : '❌ Not connected'}</span>
-              <button onClick={() => handleConnect('zoho')} className="connect-btn">
-                {status.zoho ? 'Reconnect Zoho' : 'Connect Zoho'}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-
+          ))}
+        </>
+      )}
       {modal.visible && <Modal title={modal.title} message={modal.message} onClose={closeModal} />}
     </div>
   );

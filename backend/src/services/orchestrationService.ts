@@ -49,6 +49,7 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
         leadLogId: leadLog._id,
         status: isSuccess ? 'SUCCESS' : 'FAILURE',
         rawResponse: crmResult,
+        userId: user._id,
       });
       logCreated = true;
     } catch (logError) {
@@ -86,6 +87,7 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
         leadLogId: leadLog._id,
         status: 'FAILURE',
         rawResponse: { error: error.message },
+        userId: user._id,
       });
     } catch (logError) {
       logger.error(`Failed to create failure CRMStatusLog for LeadLog ${leadLog._id}:`, logError);
