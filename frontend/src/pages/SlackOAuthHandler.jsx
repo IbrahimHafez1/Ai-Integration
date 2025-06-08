@@ -41,7 +41,7 @@ export default function SlackOAuthHandler() {
         title={modal.title}
         message={modal.message}
         onClose={() => {
-          navigate('/slack');
+          navigate('/integrations');
         }}
       />
     );

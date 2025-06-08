@@ -33,8 +33,8 @@ export default function App() {
               <Link to="/profile" className="nav-link">
                 Profile
               </Link>
-              <Link to="/slack" className="nav-link">
-                Slack
+              <Link to="/integrations" className="nav-link">
+                Integrations
               </Link>
               <Link to="/logs/leads" className="nav-link">
                 Lead Logs
@@ -74,7 +74,7 @@ export default function App() {
         />
 
         <Route
-          path="/slack"
+          path="/integrations"
           element={
             <PrivateRoute>
               <IntegrationsPage />
