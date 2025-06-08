@@ -138,7 +138,7 @@ export const zohoAuth = (req: any, res: Response) => {
     client_id: process.env.ZOHO_CLIENT_ID!,
     redirect_uri: process.env.ZOHO_REDIRECT_URI!,
     response_type: 'code',
-    scope: 'ZohoCRM.settings.ALL',
+    scope: 'ZohoCRM.modules.leads.ALL ZohoCRM.settings.ALL',
     access_type: 'offline',
     prompt: 'consent',
     state,

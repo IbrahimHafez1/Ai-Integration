@@ -51,7 +51,8 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
           logger.warn(`No Slack token found`);
           return;
         }
-        const user = await User.findOne({ slackAccessToken: tokenDoc._id }).lean();
+
+        const user = await User.findOne({ slackAccessToken: tokenDoc._id.toString() }).lean();
         if (!user) {
           logger.warn(`No internal user linked for Slack ID ${slackUserId}`);
           res.status(404).json({ success: false, message: 'User not linked', data: null });
