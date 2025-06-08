@@ -5,10 +5,6 @@ import { ApiError } from '../utils/errors.js';
 import config from '../config/index.js';
 import User from '../models/User.js';
 
-/**
- * Exchange Slack “code” for tokens, then upsert into Mongo.
- * Returns the saved token document (lean’ed).
- */
 export async function exchangeSlackCodeAndSave(userId: string, code: string) {
   const tokenUrl = 'https://slack.com/api/oauth.v2.access';
   const params = new URLSearchParams({
@@ -49,16 +45,4 @@ export async function exchangeSlackCodeAndSave(userId: string, code: string) {
   await User.findByIdAndUpdate(userId, { slackAccessToken: token._id });
 
   return token;
-}
-
-/**
- * Return a valid Slack access token for this user, or throw 404 if none.
- * (Slack’s OAuth tokens usually do not expire for basic apps; adjust refresh logic if needed.)
- */
-export async function getSlackAccessToken(userId: string) {
-  const tokenDoc = await OAuthToken.findOne({ userId, provider: 'slack' }).lean();
-  if (!tokenDoc) {
-    throw new ApiError('Slack not connected', 404);
-  }
-  return tokenDoc.accessToken;
 }
