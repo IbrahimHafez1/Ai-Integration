@@ -31,7 +31,6 @@ dotenv.config();
   // Replace with your production frontend domain
   const allowedOrigins = [
     'https://5d0c739d-620b-4833-b270-6da5909ef27a-00-38en1hwbeb1oi.kirk.replit.dev',
-    'http://localhost:3000',
   ];
 
   app.use(
