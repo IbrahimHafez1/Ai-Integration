@@ -17,7 +17,7 @@ export async function getLeadLogs(req: any, res: Response, next: NextFunction): 
 
 export async function getCRMLogs(req: any, res: Response, next: NextFunction): Promise<void> {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const crmLogs = await CRMStatusLog.find({ userId }).sort({ createdAt: -1 }).limit(50).lean();
 
     if (!crmLogs) {
