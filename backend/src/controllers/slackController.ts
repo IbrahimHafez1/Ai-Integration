@@ -48,7 +48,7 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
         }).lean();
 
         if (!tokenDoc) {
-          logger.warn(`No Slack token found`);
+          logger.warn(`No Slack token found`, { token });
           return;
         }
 
