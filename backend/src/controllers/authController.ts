@@ -89,7 +89,7 @@ export const googleAuth = (req: any, res: Response) => {
     scope: ['https://www.googleapis.com/auth/gmail.readonly'],
     prompt: 'consent',
   });
-  res.redirect(authUrl);
+  return res.redirect(authUrl);
 };
 
 export const googleCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
