@@ -31,22 +31,23 @@ export async function parseLead(message: string): Promise<any> {
     }),
   });
 
-  const result = await res.json();
-  if (!res.ok || !Array.isArray(result) || !result[0]?.generated_text) {
+  const result: any = await res.json();
+  const raw = result?.[0]?.generated_text;
+
+  if (!res.ok || !raw) {
     throw new Error(`HF pipeline error ${res.status}:\n${JSON.stringify(result, null, 2)}`);
   }
 
-  const generated = result[0].generated_text;
-
-  const matches = [...generated.matchAll(/\{[\s\S]*?\}/g)];
+  const matches = [...raw.matchAll(/\{[\s\S]*?\}/g)];
 
   for (let i = matches.length - 1; i >= 0; i--) {
     const jsonCandidate = matches[i][0];
-    const parsed = JSON.parse(jsonCandidate);
+    const clean = jsonCandidate.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+    const parsed = JSON.parse(clean);
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed;
     }
   }
 
-  throw new Error(`No valid JSON object parsed from model response:\n${generated}`);
+  throw new Error(`No valid JSON object parsed from model response:\n${raw}`);
 }
