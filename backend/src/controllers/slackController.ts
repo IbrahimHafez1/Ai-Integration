@@ -36,23 +36,13 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
         res.status(400).json({ success: false, message: 'Invalid event format', data: null });
         return;
       }
-      const { type: eventType, text, user: slackUserId, channel, bot_id, token } = event;
+      const { type: eventType, text, user: slackUserId, channel, bot_id } = event;
       if (eventType === 'message' && !bot_id && text && channel && slackUserId) {
         logger.info(`Received Slack message: ${text}`);
 
         const leadLog = await LeadLog.create({ text, slackUserId, channelId: channel, eventType });
 
-        const tokenDoc = await OAuthToken.findOne({
-          provider: 'slack',
-          accessToken: token,
-        }).lean();
-
-        if (!tokenDoc) {
-          logger.warn(`No Slack token found`, { token });
-          return;
-        }
-
-        const user = await User.findOne({ slackAccessToken: tokenDoc._id.toString() }).lean();
+        const user = await User.findOne({ slackUserId }).lean();
         if (!user) {
           logger.warn(`No internal user linked for Slack ID ${slackUserId}`);
           res.status(404).json({ success: false, message: 'User not linked', data: null });

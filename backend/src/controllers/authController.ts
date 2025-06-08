@@ -1,4 +1,3 @@
-// controllers/authController.ts
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import config from '../config/index.js';
 import { exchangeSlackCodeAndSave } from '../services/slackOAuthService.js';
@@ -9,10 +8,6 @@ import axios from 'axios';
 import User from '../models/User.js';
 import { logger } from '../utils/logger.js';
 
-/**
- * Redirect user to Slack OAuth v2 authorize page.
- * Includes necessary query params and redirect URI.
- */
 export function redirectToSlack(req: any, res: Response) {
   const { clientId, redirectUri } = config.oauth.slack;
 
@@ -27,13 +22,6 @@ function isString(value: unknown): value is string {
   return typeof value === 'string';
 }
 
-// Helper to get env variable or throw
-function getEnvVar(name: string): string {
-  const val = process.env[name];
-  if (!val) throw new Error(`Missing environment variable: ${name}`);
-  return val;
-}
-
 export async function handleSlackCallback(req: Request, res: Response, next: NextFunction) {
   try {
     const { code, state } = req.query;
@@ -45,7 +33,6 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
       throw new ApiError('Missing state parameter', 400);
     }
 
-    // Redirect to the front‐end SlackOAuthHandler with both code & state:
     const redirectUrl = `${config.frontendBaseUrl}/slack/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
     return res.redirect(redirectUrl);
   } catch (error) {
@@ -53,10 +40,6 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
   }
 }
 
-/**
- * Exchanges the Slack OAuth code for an access token and saves it to the user.
- * Requires authenticated user (req.user) and OAuth code in query.
- */
 export async function saveSlackToken(req: any, res: Response, next: NextFunction) {
   try {
     const code = req.query.code;
@@ -66,7 +49,6 @@ export async function saveSlackToken(req: any, res: Response, next: NextFunction
       throw new ApiError('Missing OAuth code or userId', 400);
     }
 
-    // Now exchange the Slack code for a token and save it
     await exchangeSlackCodeAndSave(userId, code);
 
     res.json({ success: true, message: 'Slack connected successfully!' });
