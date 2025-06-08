@@ -1,4 +1,3 @@
-// services/slackOAuthService.js
 import axios from 'axios';
 import { OAuthToken } from '../models/OAuthToken.js';
 import { ApiError } from '../utils/errors.js';
@@ -35,7 +34,6 @@ export async function exchangeSlackCodeAndSave(userId: string, code: string) {
   };
   const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-  // Upsert the OAuthToken document
   const token = await OAuthToken.findOneAndUpdate(filter, update, options);
 
   if (!token) {

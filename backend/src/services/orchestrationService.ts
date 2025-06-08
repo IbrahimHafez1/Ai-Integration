@@ -1,5 +1,3 @@
-// services/slackFlowService.ts
-
 import { CRMStatusLog } from '../models/CRMStatusLog.js';
 import { sendMail } from './emailService.js';
 import { logger } from '../utils/logger.js';

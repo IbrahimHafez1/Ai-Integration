@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import './Profile.css';
 
@@ -17,7 +17,6 @@ export default function Profile() {
             <p className="profile-info">
               <strong>Email:</strong> {user.email}
             </p>
-            {/* Add more fields here if needed */}
           </>
         ) : (
           <p className="profile-loading">Loading...</p>

@@ -1,4 +1,3 @@
-// models/OAuthToken.ts
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IOAuthToken extends Document {
@@ -17,7 +16,6 @@ const OAuthTokenSchema = new Schema({
   expiresAt: { type: Date, required: true },
 });
 
-// Ensure one doc per (userId, provider)
 OAuthTokenSchema.index({ userId: 1, provider: 1 }, { unique: true });
 
 export const OAuthToken = mongoose.model<IOAuthToken>('OAuthToken', OAuthTokenSchema);

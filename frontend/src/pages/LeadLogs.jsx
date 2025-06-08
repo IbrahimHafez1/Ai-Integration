@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { getLeadLogs } from '../services/logService';
-import './LeadLogs.css'; // Import the CSS file
+import './LeadLogs.css';
 import { AuthContext } from '../contexts/AuthContext';
 
 export default function LeadLogs() {

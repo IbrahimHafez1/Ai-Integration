@@ -1,11 +1,11 @@
 .integration-container {
   display: flex;
-  flex-direction: column; /* stack vertically */
-  justify-content: center; /* vertical centering */
-  align-items: center; /* horizontal centering */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: 2rem;
   padding: 2rem;
-  height: 100vh; /* full viewport height */
+  height: 100vh;
   background-color: #f9fafb;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   box-sizing: border-box;
@@ -17,7 +17,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 1.2rem 1.5rem;
   width: 100%;
-  max-width: 320px; /* slightly wider */
+  max-width: 320px;
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;

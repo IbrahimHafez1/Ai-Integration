@@ -1,11 +1,10 @@
-import React, { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import {
   login as apiLogin,
   register as apiRegister,
   getProfile as apiGetProfile,
 } from '../services/authService';
 
-// 1. Create a Context
 export const AuthContext = createContext({
   user: null,
   token: null,
