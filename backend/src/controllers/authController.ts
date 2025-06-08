@@ -110,11 +110,18 @@ export const googleCallback: RequestHandler = async (req: any, res: Response): P
     const refreshToken = tokens.refresh_token!;
     const expiresAt = tokens.expiry_date ? new Date(tokens.expiry_date) : undefined;
 
-    await OAuthToken.findOneAndUpdate(
+    const token = await OAuthToken.findOneAndUpdate(
       { userId, provider: 'google' },
       { accessToken, refreshToken, expiresAt },
       { upsert: true },
     );
+
+    if (!token) {
+      res.status(500).send('Failed to save token');
+      return;
+    }
+
+    await User.findOneAndUpdate({ _id: userId }, { googleAccessToken: token._id });
 
     res.send('Google account linked successfully');
     return;
@@ -139,7 +146,7 @@ export const zohoAuth = (req: any, res: Response) => {
   });
 
   const authUrl = `https://accounts.zoho.com/oauth/v2/auth?${params.toString()}`;
-  res.redirect(authUrl);
+  return res.redirect(authUrl);
 };
 
 export const zohoCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
@@ -165,13 +172,21 @@ export const zohoCallback: RequestHandler = async (req: any, res: Response): Pro
     );
 
     const { access_token, refresh_token, expires_in } = tokenRes.data;
+
     const expiresAt = new Date(Date.now() + expires_in * 1000);
 
-    await OAuthToken.findOneAndUpdate(
+    const token = await OAuthToken.findOneAndUpdate(
       { userId, provider: 'zoho' },
       { accessToken: access_token, refreshToken: refresh_token, expiresAt },
       { upsert: true },
     );
+
+    if (!token) {
+      res.status(500).send('Failed to save Zoho token');
+      return;
+    }
+
+    await User.findOneAndUpdate({ _id: userId }, { zohoAccessToken: token._id });
 
     res.send('Zoho account linked successfully');
     return;
