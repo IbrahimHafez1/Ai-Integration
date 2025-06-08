@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import axios from 'axios';
 import './OAuth.css';
+import { redirectToGoogle, redirectToZoho, redirectToSlack } from '../services/oAuthService';
 
 export default function IntegrationsPage() {
   const { token } = useContext(AuthContext);
@@ -37,7 +38,20 @@ export default function IntegrationsPage() {
       alert('You must be logged in to connect');
       return;
     }
-    window.location.href = `/api/${provider}`;
+
+    switch (provider) {
+      case 'slack':
+        redirectToSlack();
+        break;
+      case 'google':
+        redirectToGoogle();
+        break;
+      case 'zoho':
+        redirectToZoho();
+        break;
+      default:
+        console.warn('Unknown provider:', provider);
+    }
   };
 
   return (
