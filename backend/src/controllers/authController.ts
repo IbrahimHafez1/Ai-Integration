@@ -94,8 +94,7 @@ export const googleAuth: RequestHandler = (req: any, res) => {
     state,
   });
 
-  res.redirect(authUrl);
-  return;
+  return res.redirect(authUrl);
 };
 
 export const googleCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
