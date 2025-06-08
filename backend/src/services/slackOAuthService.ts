@@ -39,14 +39,16 @@ export async function exchangeSlackCodeAndSave(userId: string, code: string) {
   };
   const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-  const [tokenDoc] = await Promise.all([
-    // Upsert the OAuthToken document
-    OAuthToken.findOneAndUpdate(filter, update, options).lean(),
-    // Store the raw Slack access token on the User model
-    User.findByIdAndUpdate(userId, { slackAccessToken: access_token }),
-  ]);
+  // Upsert the OAuthToken document
+  const token = await OAuthToken.findOneAndUpdate(filter, update, options);
 
-  return tokenDoc;
+  if (!token) {
+    throw new ApiError('Failed to save token', 500);
+  }
+
+  await User.findByIdAndUpdate(userId, { slackAccessToken: token._id });
+
+  return token;
 }
 
 /**

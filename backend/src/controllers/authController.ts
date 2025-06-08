@@ -113,7 +113,7 @@ export const googleCallback: RequestHandler = async (req: any, res: Response): P
     const token = await OAuthToken.findOneAndUpdate(
       { userId, provider: 'google' },
       { accessToken, refreshToken, expiresAt },
-      { upsert: true },
+      { upsert: true, new: true },
     );
 
     if (!token) {
@@ -178,7 +178,7 @@ export const zohoCallback: RequestHandler = async (req: any, res: Response): Pro
     const token = await OAuthToken.findOneAndUpdate(
       { userId, provider: 'zoho' },
       { accessToken: access_token, refreshToken: refresh_token, expiresAt },
-      { upsert: true },
+      { upsert: true, new: true },
     );
 
     if (!token) {
