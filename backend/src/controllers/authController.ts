@@ -98,11 +98,12 @@ export const googleAuth: RequestHandler = (req: any, res) => {
 };
 
 export const googleCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
-  const { code, userId } = req.query;
-  if (!code || !userId) res.status(400).send('Missing code or user');
+  const { code, state } = req.query;
+  if (!code || !state) res.status(400).send('Missing code or state');
 
   try {
     const { tokens } = await googleOauth2Client.getToken(code);
+    const userId = state;
     googleOauth2Client.setCredentials(tokens);
 
     const accessToken = tokens.access_token!;

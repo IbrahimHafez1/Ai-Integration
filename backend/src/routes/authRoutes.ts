@@ -19,7 +19,7 @@ router.get('/google/', googleAuth);
 router.get('/google/callback', googleCallback);
 
 router.get('/zoho', ensureAuth, zohoAuth);
-router.get('/zoho/callback', ensureAuth, zohoCallback);
+router.get('/zoho/callback', zohoCallback);
 router.get('/check-tokens', ensureAuth, checkOAuthStatus);
 
 export default router;
