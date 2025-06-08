@@ -19,8 +19,6 @@ export function redirectToSlack(req: any, res: Response) {
   slackUrl.searchParams.set('client_id', clientId);
   slackUrl.searchParams.set('scope', 'channels:read,channels:history,users:read');
   slackUrl.searchParams.set('redirect_uri', redirectUri);
-  res.json({ redirectUrl: slackUrl.toString() });
-  return;
   return res.redirect(slackUrl.toString());
 }
 

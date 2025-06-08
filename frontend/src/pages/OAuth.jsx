@@ -41,7 +41,7 @@ export default function IntegrationsPage() {
 
     switch (provider) {
       case 'slack':
-        redirectToSlack(token);
+        redirectToSlack();
         break;
       case 'google':
         redirectToGoogle();
