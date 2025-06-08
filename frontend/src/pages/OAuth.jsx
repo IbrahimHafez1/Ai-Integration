@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
+import Modal from '../components/Modal';
 import './OAuth.css';
 import { redirectToGoogle, redirectToZoho, redirectToSlackOAuth } from '../services/oAuthService';
 import { checkOAuthStatus } from '../services/oAuthService';
@@ -9,6 +10,7 @@ export default function IntegrationsPage() {
   const [status, setStatus] = useState({ slack: null, google: null, zoho: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [modal, setModal] = useState({ visible: false, title: '', message: '' });
 
   useEffect(() => {
     async function fetchOAuthStatus() {
@@ -32,6 +34,15 @@ export default function IntegrationsPage() {
       return;
     }
 
+    // Show modal confirmation
+    const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+
+    setModal({
+      visible: true,
+      title: `${providerName} Integration`,
+      message: `Redirecting to ${providerName} for connection...`,
+    });
+
     switch (provider) {
       case 'slack':
         redirectToSlackOAuth(user._id);
@@ -44,7 +55,12 @@ export default function IntegrationsPage() {
         break;
       default:
         console.warn('Unknown provider:', provider);
+        setModal({ visible: false, title: '', message: '' });
     }
+  };
+
+  const closeModal = () => {
+    setModal({ visible: false, title: '', message: '' });
   };
 
   return (
@@ -81,6 +97,8 @@ export default function IntegrationsPage() {
           </>
         )}
       </div>
+
+      {modal.visible && <Modal title={modal.title} message={modal.message} onClose={closeModal} />}
     </div>
   );
 }
