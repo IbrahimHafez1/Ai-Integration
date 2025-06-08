@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  checkOAuthStatus,
   googleAuth,
   googleCallback,
   handleSlackCallback,
@@ -8,7 +9,6 @@ import {
   zohoCallback,
 } from '../controllers/authController.js';
 import { ensureAuth } from '../middleware/auth.js';
-import { checkOAuthStatus } from '../controllers/slackController.js';
 
 const router = express.Router();
 

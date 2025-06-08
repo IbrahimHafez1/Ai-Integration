@@ -7,6 +7,8 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { google } from 'googleapis';
 import { OAuthToken } from '../models/OAuthToken.js';
 import axios from 'axios';
+import User from '../models/User.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Redirect user to Slack OAuth v2 authorize page.
@@ -170,6 +172,58 @@ export const zohoCallback: RequestHandler = async (req: any, res: Response): Pro
   } catch (err) {
     console.error('Zoho OAuth error:', err);
     res.status(500).send('Authentication failed');
+    return;
+  }
+};
+
+export const checkOAuthStatus = async (req: any, res: Response) => {
+  try {
+    const userId = req?.user?._id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        data: null,
+        message: 'Unauthorized: User not authenticated',
+      });
+      return;
+    }
+
+    const user = await User.findById(userId)
+      .select('slackAccessToken googleAccessToken zohoAccessToken')
+      .lean();
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        data: null,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    const connected = {
+      slack: Boolean(user.slackAccessToken),
+      google: Boolean(user.googleAccessToken),
+      zoho: Boolean(user.zohoAccessToken),
+    };
+
+    res.status(200).json({
+      success: true,
+      data: connected,
+      message: 'OAuth connection statuses retrieved successfully',
+    });
+    return;
+  } catch (error: any) {
+    logger.error('Error checking OAuth connection statuses', {
+      error: error.message,
+    });
+
+    res.status(500).json({
+      success: false,
+      data: null,
+      message: 'Internal server error',
+    });
     return;
   }
 };
