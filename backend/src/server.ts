@@ -28,27 +28,7 @@ dotenv.config();
     }),
   );
 
-  // Replace with your production frontend domain
-  const allowedOrigins = [
-    'https://5d0c739d-620b-4833-b270-6da5909ef27a-00-38en1hwbeb1oi.kirk.replit.dev',
-  ];
-
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, origin);
-        } else {
-          callback(new Error('Blocked by CORS'));
-        }
-      },
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-      exposedHeaders: ['Authorization', 'Set-Cookie'],
-    }),
-  );
-
+  app.use(cors());
   app.use(express.json());
   app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
