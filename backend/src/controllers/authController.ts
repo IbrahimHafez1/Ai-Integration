@@ -94,7 +94,7 @@ export const googleAuth: RequestHandler = (req: any, res) => {
     state,
   });
 
-  res.json({ url: authUrl });
+  res.redirect(authUrl);
   return;
 };
 

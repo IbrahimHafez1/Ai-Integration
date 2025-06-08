@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import axios from 'axios';
 import './OAuth.css';
 import { redirectToGoogle, redirectToZoho, redirectToSlackOAuth } from '../services/oAuthService';
+import { checkOAuthStatus } from '../services/oAuthService';
 
 export default function IntegrationsPage() {
   const { user, token } = useContext(AuthContext);
@@ -11,26 +11,19 @@ export default function IntegrationsPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    async function checkConnections() {
+    async function fetchOAuthStatus() {
       try {
-        const headers = { Authorization: `Bearer ${token}` };
-        const [slackRes, googleRes, zohoRes] = await Promise.all([
-          axios.get('/api/slack/connection', { headers }),
-          axios.get('/api/user/oauth-status/google', { headers }),
-          axios.get('/api/user/oauth-status/zoho', { headers }),
-        ]);
-        setStatus({
-          slack: slackRes.data.connected,
-          google: googleRes.data.connected,
-          zoho: zohoRes.data.connected,
-        });
+        const connectionStatus = await checkOAuthStatus(token);
+        setStatus(connectionStatus);
       } catch (err) {
+        console.error('Error fetching OAuth status:', err);
         setError('Failed to fetch integration status');
       } finally {
         setLoading(false);
       }
     }
-    if (token) checkConnections();
+
+    if (token) fetchOAuthStatus();
   }, [token]);
 
   const handleConnect = (provider) => {
