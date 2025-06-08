@@ -44,10 +44,10 @@ export default function IntegrationsPage() {
         redirectToSlackOAuth(user._id);
         break;
       case 'google':
-        redirectToGoogle();
+        redirectToGoogle(user._id);
         break;
       case 'zoho':
-        redirectToZoho();
+        redirectToZoho(user._id);
         break;
       default:
         console.warn('Unknown provider:', provider);

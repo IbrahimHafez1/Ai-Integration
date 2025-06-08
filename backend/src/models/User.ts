@@ -7,6 +7,8 @@ export interface IUser extends Document {
   password: string;
   isActive: boolean;
   slackAccessToken?: string;
+  googleAccessToken?: string;
+  zohoAccessToken?: string;
   comparePassword(candidate: string): Promise<boolean>;
 }
 
@@ -17,6 +19,8 @@ const userSchema = new Schema<IUser>(
     password: { type: String, required: true },
     isActive: { type: Boolean, default: false },
     slackAccessToken: { type: String },
+    googleAccessToken: { type: String },
+    zohoAccessToken: { type: String },
   },
   { timestamps: true },
 );

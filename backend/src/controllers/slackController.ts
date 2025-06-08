@@ -63,9 +63,9 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
   }
 }
 
-export const checkSlackConnection = async (req: any, res: Response) => {
+export const checkOAuthStatus = async (req: any, res: Response) => {
   try {
-    const userId = req?.user!._id;
+    const userId = req?.user?._id;
 
     if (!userId) {
       res.status(401).json({
@@ -76,7 +76,9 @@ export const checkSlackConnection = async (req: any, res: Response) => {
       return;
     }
 
-    const user = await User.findById(userId).select('slackAccessToken').lean();
+    const user = await User.findById(userId)
+      .select('slackAccessToken googleAccessToken zohoAccessToken')
+      .lean();
 
     if (!user) {
       res.status(404).json({
@@ -87,16 +89,23 @@ export const checkSlackConnection = async (req: any, res: Response) => {
       return;
     }
 
-    const isConnected = Boolean(user.slackAccessToken);
+    const connected = {
+      slack: Boolean(user.slackAccessToken),
+      google: Boolean(user.googleAccessToken),
+      zoho: Boolean(user.zohoAccessToken),
+    };
 
     res.status(200).json({
       success: true,
-      data: { connected: isConnected },
-      message: isConnected ? 'Slack is connected' : 'Slack is not connected',
+      data: connected,
+      message: 'OAuth connection statuses retrieved successfully',
     });
     return;
   } catch (error: any) {
-    logger.error('Error checking Slack connection', { error: error.message });
+    logger.error('Error checking OAuth connection statuses', {
+      error: error.message,
+    });
+
     res.status(500).json({
       success: false,
       data: null,

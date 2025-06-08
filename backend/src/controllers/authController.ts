@@ -91,8 +91,7 @@ export const googleAuth = (req: any, res: Response) => {
 };
 
 export const googleCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
-  const code = req.query.code as string;
-  const userId = req.user?.id;
+  const { code, userId } = req.query;
   if (!code || !userId) res.status(400).send('Missing code or user');
 
   try {
@@ -108,6 +107,7 @@ export const googleCallback: RequestHandler = async (req: any, res: Response): P
       { accessToken, refreshToken, expiresAt },
       { upsert: true },
     );
+
     res.send('Google account linked successfully');
     return;
   } catch (err) {
@@ -118,6 +118,8 @@ export const googleCallback: RequestHandler = async (req: any, res: Response): P
 };
 
 export const zohoAuth = (req: any, res: Response) => {
+  const { userId } = req.query;
+  const state = encodeURIComponent(userId);
   const params = new URLSearchParams({
     client_id: process.env.ZOHO_CLIENT_ID!,
     redirect_uri: process.env.ZOHO_REDIRECT_URI!,
@@ -125,16 +127,21 @@ export const zohoAuth = (req: any, res: Response) => {
     scope: 'ZohoCRM.settings.ALL',
     access_type: 'offline',
     prompt: 'consent',
+    state,
   });
+
   const authUrl = `https://accounts.zoho.com/oauth/v2/auth?${params.toString()}`;
   res.redirect(authUrl);
-  return;
 };
 
 export const zohoCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
-  const code = req.query.code as string;
-  const userId = req.user?.id;
-  if (!code || !userId) res.status(400).send('Missing code or user');
+  const { code, state } = req.query;
+  const userId = state;
+
+  if (!code || !userId) {
+    res.status(400).send('Missing code or user');
+    return;
+  }
 
   try {
     const tokenRes = await axios.post(
@@ -148,18 +155,16 @@ export const zohoCallback: RequestHandler = async (req: any, res: Response): Pro
       }),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
     );
-    const data = tokenRes.data;
-    const accessToken = data.access_token;
-    const refreshToken = data.refresh_token;
-    const expiresInSec = data.expires_in;
 
-    const expiresAt = new Date(Date.now() + expiresInSec * 1000);
+    const { access_token, refresh_token, expires_in } = tokenRes.data;
+    const expiresAt = new Date(Date.now() + expires_in * 1000);
 
     await OAuthToken.findOneAndUpdate(
       { userId, provider: 'zoho' },
-      { accessToken, refreshToken, expiresAt },
+      { accessToken: access_token, refreshToken: refresh_token, expiresAt },
       { upsert: true },
     );
+
     res.send('Zoho account linked successfully');
     return;
   } catch (err) {
