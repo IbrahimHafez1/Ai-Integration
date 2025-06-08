@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import { AuthContext } from '../contexts/AuthContext';
 import axios from 'axios';
+import './SlackOAuthHandler.css';
 
 export default function SlackOAuthHandler() {
   const navigate = useNavigate();
