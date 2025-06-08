@@ -188,7 +188,8 @@ export const zohoCallback: RequestHandler = async (req: any, res: Response): Pro
 
     await User.findOneAndUpdate({ _id: userId }, { zohoAccessToken: token._id });
 
-    res.send('Zoho account linked successfully');
+    res.redirect(`${config.frontendBaseUrl}/integrations`);
+
     return;
   } catch (err) {
     console.error('Zoho OAuth error:', err);

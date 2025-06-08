@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
+import User from '../models/User.js';
 import { LeadLog } from '../models/LeadLog.js';
 import { logger } from '../utils/logger.js';
 import { runSlackFlow } from '../services/orchestrationService.js';
-import User from '../models/User.js';
+import { OAuthToken } from '../models/OAuthToken.js';
 
 export async function handleSlackEvents(req: Request, res: Response): Promise<void> {
   try {
@@ -35,28 +36,46 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
         res.status(400).json({ success: false, message: 'Invalid event format', data: null });
         return;
       }
+      const { type: eventType, text, user: slackUserId, channel, bot_id, token } = event;
+      if (eventType === 'message' && !bot_id && text && channel && slackUserId) {
+        logger.info(`Received Slack message: ${text}`);
 
-      const { type: eventType, text, user, channel, bot_id } = event;
+        const leadLog = await LeadLog.create({ text, slackUserId, channelId: channel, eventType });
 
-      if (eventType === 'message' && !bot_id && text && channel && user) {
-        logger.info(`Slack message received: ${text} (from ${user} in ${channel})`);
+        const tokenDoc = await OAuthToken.findOne({
+          provider: 'slack',
+          accessToken: token,
+        }).lean();
 
-        const leadLog = await LeadLog.create({
-          text,
-          slackUserId: user,
-          channelId: channel,
-          eventType,
+        if (!tokenDoc) {
+          logger.warn(`No Slack token found`);
+          return;
+        }
+        const user = await User.findOne({ slackAccessToken: tokenDoc._id }).lean();
+        if (!user) {
+          logger.warn(`No internal user linked for Slack ID ${slackUserId}`);
+          res.status(404).json({ success: false, message: 'User not linked', data: null });
+          return;
+        }
+
+        if (!user.zohoAccessToken) {
+          logger.warn(`User ${user._id} has no Zoho token; continuing without it`);
+          return;
+        }
+
+        await runSlackFlow({
+          leadLog,
+          user,
+          zohoAccessToken: user.zohoAccessToken,
+        }).catch((err) => {
+          logger.error('Error running Slack flow:', err);
         });
-
-        await runSlackFlow({ leadLog }).catch((err: any) =>
-          logger.error('Error running Slack flow:', err),
-        );
       }
     }
 
     res.status(200).json({ success: true, data: null, message: 'Event processed' });
+    return;
   } catch (error: any) {
-    console.log({ error });
     logger.error('Slack event handler error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: 'Internal server error', data: null });
     return;
