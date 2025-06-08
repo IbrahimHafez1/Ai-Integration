@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
-import SlackIntegration from './pages/SlackIntegration';
+import IntegrationsPage from './pages/OAuth';
 import SlackOAuthHandler from './pages/SlackOAuthHandler';
 import LeadLogs from './pages/LeadLogs';
 import CRMLogs from './pages/CRMLogs';
@@ -21,7 +21,6 @@ export default function App() {
 
   return (
     <div>
-      {/* ——— Updated Header ——— */}
       <nav className="nav-bar">
         <div className="nav-left">
           <Link to="/" className="nav-brand">
@@ -60,10 +59,8 @@ export default function App() {
         </div>
       </nav>
 
-      {/* ——— Page Routes ——— */}
       <Routes>
         <Route path="/" element={<Home />} />
-
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
@@ -80,7 +77,7 @@ export default function App() {
           path="/slack"
           element={
             <PrivateRoute>
-              <SlackIntegration />
+              <IntegrationsPage />
             </PrivateRoute>
           }
         />
@@ -108,8 +105,12 @@ export default function App() {
         <Route
           path="*"
           element={
-            <div className="container">
-              <h2>404 - Page not found</h2>
+            <div className="container" style={{ padding: '2rem', textAlign: 'center' }}>
+              <h2>404 - Page Not Found</h2>
+              <p>The page you're looking for doesn't exist.</p>
+              <Link to="/" className="nav-link">
+                Go to Home
+              </Link>
             </div>
           }
         />

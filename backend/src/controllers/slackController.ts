@@ -48,7 +48,7 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
           eventType,
         });
 
-        await runSlackFlow({ leadLog }).catch((err) =>
+        await runSlackFlow({ leadLog }).catch((err: any) =>
           logger.error('Error running Slack flow:', err),
         );
       }

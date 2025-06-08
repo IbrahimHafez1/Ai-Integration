@@ -1,4 +1,4 @@
-import '../pages/SlackIntegration.css';
+import '../pages/OAuth.css';
 
 export default function Modal({ title, message, onClose }) {
   return (

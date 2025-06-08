@@ -2,28 +2,33 @@ import { CRMStatusLog } from '../models/CRMStatusLog.js';
 import { sendMail } from './emailService.js';
 import { logger } from '../utils/logger.js';
 import { createLead } from './crmService.js';
+import { parseLead } from './airService.js';
+import { withRetry } from '../utils/retry.js';
 
 export async function runSlackFlow({ leadLog }: { leadLog: any }) {
   try {
-    // Parse lead data
-    const [fullName, company, email, phone] = leadLog.text.split('|').map((s: string) => s.trim());
-    const [lastName, ...firstNameParts] = fullName.split(' ');
-    const firstName = firstNameParts.join(' ');
+    const leadData = await parseLead(leadLog.text);
+    console.log({ leadData });
 
-    // Prepare CRM payload
+    const rawName = leadData?.name ?? 'Unknown Unknown';
+    const nameParts = rawName.trim().split(' ');
+    const lastName = nameParts[0] || 'Unknown';
+    const firstName = nameParts.slice(1).join(' ') || 'Unknown';
+
     const zohoPayload = {
       Last_Name: lastName,
       First_Name: firstName,
-      Company: company,
-      Email: email,
-      Phone: phone,
+      Company: leadData?.company || 'Unknown Company',
+      Email: leadData?.email || '',
+      Phone: leadData?.phone || '',
+      Description: leadData?.interest
+        ? `Interested in: ${leadData.interest}`
+        : 'No specific interest provided',
     };
 
-    // Create CRM lead
-    const crmResult = await createLead(zohoPayload);
+    const crmResult = await withRetry(() => createLead(zohoPayload), 3, 1000);
     const isSuccess = crmResult.status === 'SUCCESS';
 
-    // 1) Log CRM result
     let logCreated = false;
     try {
       await CRMStatusLog.create({
@@ -39,7 +44,6 @@ export async function runSlackFlow({ leadLog }: { leadLog: any }) {
     if (logCreated) {
       try {
         const recipientEmail = process.env.NOTIFY_EMAIL!;
-
         await sendMail({
           to: recipientEmail,
           subject: isSuccess
@@ -47,7 +51,7 @@ export async function runSlackFlow({ leadLog }: { leadLog: any }) {
             : `Zoho Lead Creation FAILED for ${leadLog._id}`,
           text: isSuccess
             ? `Lead ID ${crmResult.id} created for ${firstName} ${lastName}.`
-            : `Error: ${crmResult.raw?.error || crmResult.message || 'Unknown error'}`,
+            : `Error: ${crmResult.raw?.error || crmResult.message || 'Unknown error'}\n\nLead Data: ${JSON.stringify(zohoPayload, null, 2)}`,
         });
       } catch (emailErr) {
         logger.error(`Failed to send SlackFlow email for LeadLog ${leadLog._id}:`, emailErr);

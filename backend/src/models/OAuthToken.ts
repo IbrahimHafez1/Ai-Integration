@@ -1,22 +1,23 @@
-import { Schema, model, Document, ObjectId } from 'mongoose';
+// models/OAuthToken.ts
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IOAuthToken extends Document {
-  userId: string;
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: Date;
+  userId: mongoose.Types.ObjectId;
   provider: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: Date;
 }
 
-const oauthTokenSchema = new Schema<IOAuthToken>(
-  {
-    userId: { type: String, ref: 'User', required: true, index: true },
-    accessToken: { type: String, required: true },
-    refreshToken: { type: String },
-    expiresAt: { type: Date },
-    provider: { type: String, required: true },
-  },
-  { timestamps: true },
-);
+const OAuthTokenSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  provider: { type: String, required: true, enum: ['google', 'zoho'], index: true },
+  accessToken: { type: String, required: true },
+  refreshToken: { type: String, required: true },
+  expiresAt: { type: Date, required: true },
+});
 
-export const OAuthToken = model<IOAuthToken>('OAuthToken', oauthTokenSchema);
+// Ensure one doc per (userId, provider)
+OAuthTokenSchema.index({ userId: 1, provider: 1 }, { unique: true });
+
+export const OAuthToken = mongoose.model<IOAuthToken>('OAuthToken', OAuthTokenSchema);

@@ -1,9 +1,12 @@
 // controllers/authController.ts
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import config from '../config/index.js';
 import { exchangeSlackCodeAndSave } from '../services/slackOAuthService.js';
 import { ApiError } from '../utils/errors.js';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { google } from 'googleapis';
+import { OAuthToken } from '../models/OAuthToken.js';
+import axios from 'axios';
 
 /**
  * Redirect user to Slack OAuth v2 authorize page.
@@ -57,7 +60,7 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
  * Exchanges the Slack OAuth code for an access token and saves it to the user.
  * Requires authenticated user (req.user) and OAuth code in query.
  */
-export async function saveSlackToken(req: Request, res: Response, next: NextFunction) {
+export async function saveSlackToken(req: any, res: Response, next: NextFunction) {
   try {
     const code = req.query.code;
     const userToken = req.query.userToken;
@@ -89,3 +92,97 @@ export async function saveSlackToken(req: Request, res: Response, next: NextFunc
     next(err);
   }
 }
+
+const googleOauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI,
+);
+
+export const googleAuth = (req: any, res: Response) => {
+  const authUrl = googleOauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: ['https://www.googleapis.com/auth/gmail.readonly'],
+    prompt: 'consent',
+  });
+  res.redirect(authUrl);
+};
+
+export const googleCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
+  const code = req.query.code as string;
+  const userId = req.user?.id;
+  if (!code || !userId) res.status(400).send('Missing code or user');
+
+  try {
+    const { tokens } = await googleOauth2Client.getToken(code);
+    googleOauth2Client.setCredentials(tokens);
+
+    const accessToken = tokens.access_token!;
+    const refreshToken = tokens.refresh_token!;
+    const expiresAt = tokens.expiry_date ? new Date(tokens.expiry_date) : undefined;
+
+    await OAuthToken.findOneAndUpdate(
+      { userId, provider: 'google' },
+      { accessToken, refreshToken, expiresAt },
+      { upsert: true },
+    );
+    res.send('Google account linked successfully');
+    return;
+  } catch (err) {
+    console.error('Google OAuth error:', err);
+    res.status(500).send('Authentication failed');
+    return;
+  }
+};
+
+export const zohoAuth = (req: any, res: Response) => {
+  const params = new URLSearchParams({
+    client_id: process.env.ZOHO_CLIENT_ID!,
+    redirect_uri: process.env.ZOHO_REDIRECT_URI!,
+    response_type: 'code',
+    scope: 'ZohoCRM.settings.ALL',
+    access_type: 'offline',
+    prompt: 'consent',
+  });
+  const authUrl = `https://accounts.zoho.com/oauth/v2/auth?${params.toString()}`;
+  res.redirect(authUrl);
+  return;
+};
+
+export const zohoCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
+  const code = req.query.code as string;
+  const userId = req.user?.id;
+  if (!code || !userId) res.status(400).send('Missing code or user');
+
+  try {
+    const tokenRes = await axios.post(
+      'https://accounts.zoho.com/oauth/v2/token',
+      new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: process.env.ZOHO_CLIENT_ID!,
+        client_secret: process.env.ZOHO_CLIENT_SECRET!,
+        redirect_uri: process.env.ZOHO_REDIRECT_URI!,
+        code,
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+    );
+    const data = tokenRes.data;
+    const accessToken = data.access_token;
+    const refreshToken = data.refresh_token;
+    const expiresInSec = data.expires_in;
+
+    const expiresAt = new Date(Date.now() + expiresInSec * 1000);
+
+    await OAuthToken.findOneAndUpdate(
+      { userId, provider: 'zoho' },
+      { accessToken, refreshToken, expiresAt },
+      { upsert: true },
+    );
+    res.send('Zoho account linked successfully');
+    return;
+  } catch (err) {
+    console.error('Zoho OAuth error:', err);
+    res.status(500).send('Authentication failed');
+    return;
+  }
+};
