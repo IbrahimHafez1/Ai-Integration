@@ -18,7 +18,7 @@ router.get('/slack/callback', handleSlackCallback);
 router.get('/google/', googleAuth);
 router.get('/google/callback', googleCallback);
 
-router.get('/zoho', ensureAuth, zohoAuth);
+router.get('/zoho', zohoAuth);
 router.get('/zoho/callback', zohoCallback);
 router.get('/check-tokens', ensureAuth, checkOAuthStatus);
 
