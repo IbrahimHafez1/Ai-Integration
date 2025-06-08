@@ -47,7 +47,7 @@ export default function CRMLogs() {
               {logs.length > 0 ? (
                 logs.map((log) => (
                   <tr key={log._id}>
-                    <td>{log.rawResponse.raw?.details.id}</td>
+                    <td>{log.rawResponse?.id}</td>
                     <td>{log.leadLogId}</td>
                     <td>{log.status}</td>
                     <td>{new Date(log.createdAt).toLocaleString()}</td>
