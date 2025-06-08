@@ -83,13 +83,24 @@ const googleOauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_REDIRECT_URI,
 );
 
-export const googleAuth = (req: any, res: Response) => {
+export const googleAuth: RequestHandler = (req: any, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorized' });
+    return;
+  }
+
+  const state = encodeURIComponent(userId);
   const authUrl = googleOauth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: ['https://www.googleapis.com/auth/gmail.readonly'],
     prompt: 'consent',
+    scope: ['https://www.googleapis.com/auth/userinfo.email'],
+    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+    state,
   });
-  return res.redirect(authUrl);
+
+  res.json({ url: authUrl });
+  return;
 };
 
 export const googleCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
