@@ -27,7 +27,7 @@ export async function exchangeSlackCodeAndSave(userId: string, code: string) {
     throw new ApiError(`Slack OAuth failed: ${resp.data.error}`, 400);
   }
 
-  const { access_token } = resp.data;
+  const { access_token, authed_user } = resp.data;
 
   const filter = { userId, provider: 'slack' };
   const update = {
@@ -42,7 +42,10 @@ export async function exchangeSlackCodeAndSave(userId: string, code: string) {
     throw new ApiError('Failed to save token', 500);
   }
 
-  await User.findByIdAndUpdate(userId, { slackAccessToken: token._id });
+  await User.findByIdAndUpdate(userId, {
+    slackAccessToken: token._id,
+    slackUserId: authed_user.id,
+  });
 
   return token;
 }

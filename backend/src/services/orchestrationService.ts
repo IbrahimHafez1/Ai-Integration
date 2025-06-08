@@ -4,7 +4,7 @@ import { CRMStatusLog } from '../models/CRMStatusLog.js';
 import { sendMail } from './emailService.js';
 import { logger } from '../utils/logger.js';
 import { createLead } from './crmService.js';
-import { parseLead } from './airService.js';
+import { parseLead } from './aiService.js';
 import { withRetry } from '../utils/retry.js';
 import { IUser } from '../models/User.js';
 import { OAuthToken } from '../models/OAuthToken.js';

@@ -6,6 +6,7 @@ export interface IUser extends Document {
   name: string;
   password: string;
   isActive: boolean;
+  slackUserId?: string;
   slackAccessToken?: string;
   googleAccessToken?: string;
   zohoAccessToken?: string;
@@ -18,6 +19,7 @@ const userSchema = new Schema<IUser>(
     name: { type: String, required: true },
     password: { type: String, required: true },
     isActive: { type: Boolean, default: false },
+    slackUserId: { type: String },
     slackAccessToken: { type: String },
     googleAccessToken: { type: String },
     zohoAccessToken: { type: String },

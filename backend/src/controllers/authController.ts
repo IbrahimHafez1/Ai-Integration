@@ -3,7 +3,6 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import config from '../config/index.js';
 import { exchangeSlackCodeAndSave } from '../services/slackOAuthService.js';
 import { ApiError } from '../utils/errors.js';
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import { google } from 'googleapis';
 import { OAuthToken } from '../models/OAuthToken.js';
 import axios from 'axios';
