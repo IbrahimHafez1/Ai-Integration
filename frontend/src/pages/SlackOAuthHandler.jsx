@@ -21,7 +21,7 @@ export default function SlackOAuthHandler() {
       .get('/slack/save-token', {
         params: {
           code,
-          userToken: state,
+          userId: state,
         },
         headers: {
           Authorization: `Bearer ${token}`,
