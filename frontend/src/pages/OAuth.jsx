@@ -41,7 +41,7 @@ export default function IntegrationsPage() {
 
     switch (provider) {
       case 'slack':
-        redirectToSlackOAuth(user);
+        redirectToSlackOAuth(user._id);
         break;
       case 'google':
         redirectToGoogle();
