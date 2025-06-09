@@ -33,10 +33,12 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
       Company: leadData?.company || 'Unknown Company',
       Email: leadData?.email || '',
       Phone: leadData?.phone || '',
-      Description: leadData?.interest
-        ? `Interested in: ${leadData.interest}`
-        : 'No specific interest provided',
+      Description: leadData?.interest,
     };
+
+    if (!zohoPayload.Description) {
+      throw new Error('No interest Provided');
+    }
 
     const crmResult = await withRetry(() => createLead(zohoPayload, token.accessToken), 3, 1000);
     const isSuccess = crmResult.status === 'SUCCESS';
