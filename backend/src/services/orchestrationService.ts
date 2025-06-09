@@ -23,14 +23,15 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
       throw new Error('No Zoho token found for user');
     }
 
-    const rawName = leadData?.name ?? 'John Doe';
-    const [lastName, ...firstParts] = rawName.trim().split(' ');
-    const firstName = firstParts.join(' ') || 'Unknown';
+    const rawName = leadData?.name?.trim() || '';
+    const [firstNameRaw, ...lastParts] = rawName.split(' ');
+    const firstName = firstNameRaw;
+    const lastName = lastParts.join(' ');
 
     const zohoPayload = {
-      Last_Name: lastName || 'Doe',
-      First_Name: firstName,
-      Company: leadData?.company || 'Unknown Company',
+      Last_Name: lastName || 'Unknown',
+      First_Name: firstName || '',
+      Company: leadData?.company || '',
       Email: leadData?.email || '',
       Phone: leadData?.phone || '',
       Description: leadData?.interest,
