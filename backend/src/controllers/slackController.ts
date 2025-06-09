@@ -7,7 +7,16 @@ import { parseLead } from '../services/aiService.js';
 
 export async function handleSlackEvents(req: Request, res: Response): Promise<void> {
   try {
-    const { type, event, challenge } = req.body;
+    const { type, event, challenge, event_id } = req.body;
+    const seenEventIds = new Set<string>();
+
+    if (seenEventIds.has(event_id)) {
+      logger.warn('Duplicate Slack event');
+      res.status(200).json({ success: true, data: null, message: 'Duplicate event' });
+      return;
+    }
+
+    seenEventIds.add(event_id);
 
     if (!type) {
       logger.warn('Missing Slack event type');
