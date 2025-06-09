@@ -58,54 +58,70 @@ export async function saveSlackToken(req: any, res: Response, next: NextFunction
   }
 }
 
-const googleOauth2Client = new google.auth.OAuth2(
+const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URI,
 );
 
-export const googleAuth: RequestHandler = (req: any, res) => {
-  const userId = req.query.userId;
+export const googleAuth: RequestHandler = (req, res) => {
+  const userId = String(req.query.userId);
   const state = encodeURIComponent(userId);
-  const authUrl = googleOauth2Client.generateAuthUrl({
+  const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: ['https://www.googleapis.com/auth/userinfo.email'],
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
     state,
   });
 
-  return res.redirect(authUrl);
+  res.redirect(authUrl);
 };
 
-export const googleCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
-  const { code, state } = req.query;
-  if (!code || !state) res.status(400).send('Missing code or state');
+export const googleCallback: RequestHandler = async (req, res) => {
+  const { code, state } = req.query as { code?: string; state?: string };
+
+  if (!code || !state) {
+    res.status(400).send('Missing code or state');
+    return;
+  }
 
   try {
-    const { tokens } = await googleOauth2Client.getToken(code);
-    const userId = state;
-    googleOauth2Client.setCredentials(tokens);
+    const { tokens } = await oauth2Client.getToken(code as string);
+    oauth2Client.setCredentials(tokens);
 
-    const accessToken = tokens.access_token!;
-    const refreshToken = tokens.refresh_token!;
-    const expiresAt = tokens.expiry_date ? new Date(tokens.expiry_date) : undefined;
+    const oauth2 = google.oauth2({
+      auth: oauth2Client,
+      version: 'v2',
+    });
+    const { data: profile } = await oauth2.userinfo.get();
 
-    const token = await OAuthToken.findOneAndUpdate(
+    if (!profile.email || !profile.verified_email) {
+      throw new Error('Google account has no verified email');
+    }
+
+    const userId = decodeURIComponent(state);
+
+    await OAuthToken.findOneAndUpdate(
       { userId, provider: 'google' },
-      { accessToken, refreshToken, expiresAt, userId, provider: 'google' },
+      {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+        userId,
+        provider: 'google',
+      },
       { upsert: true, new: true },
     );
 
-    if (!token) {
-      res.status(500).send('Failed to save token');
-      return;
-    }
+    await User.findByIdAndUpdate(userId, {
+      $set: {
+        gmail: profile.email,
+      },
+    });
 
-    await User.findOneAndUpdate({ _id: userId }, { googleAccessToken: token._id });
-
-    return res.redirect(`${process.env.FRONTEND_BASE_URL}/integrations`);
-  } catch (err) {
+    res.redirect(`${process.env.FRONTEND_BASE_URL}/integrations`);
+    return;
+  } catch (err: any) {
     console.error('Google OAuth error:', err);
     res.status(500).send('Authentication failed');
     return;

@@ -54,7 +54,7 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
     }
 
     if (logCreated) {
-      const recipientEmail = user?.email;
+      const recipientEmail = user?.gmail;
       if (!recipientEmail) {
         logger.warn(`No email found for user ${user._id}, skipping notification.`);
       } else {

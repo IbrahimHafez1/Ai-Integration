@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
   email: string;
+  gmail?: string;
   name: string;
   password: string;
   isActive: boolean;
@@ -15,7 +16,8 @@ export interface IUser extends Document {
 
 const userSchema = new Schema<IUser>(
   {
-    email: { type: String, required: true, unique: true, index: true },
+    email: { type: String, required: true, unique: true },
+    gmail: { type: String, unique: true },
     name: { type: String, required: true },
     password: { type: String, required: true },
     isActive: { type: Boolean, default: false },
