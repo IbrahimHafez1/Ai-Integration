@@ -4,6 +4,7 @@ import { LeadLog } from '../models/LeadLog.js';
 import { logger } from '../utils/logger.js';
 import { runSlackFlow } from '../services/orchestrationService.js';
 import { parseLead } from '../services/aiService.js';
+import { getIO } from '../utils/socket.js';
 
 export async function handleSlackEvents(req: Request, res: Response): Promise<void> {
   try {
@@ -86,6 +87,15 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
           return;
         }
 
+        const io = getIO();
+        io.to(String(user._id)).emit('leadCreated', {
+          leadId: leadLog._id,
+          interest: leadData.interest,
+          text: leadLog.text,
+          createdAt: leadLog.createdAt,
+        });
+        console.log({ io, leadLog });
+
         await runSlackFlow({ leadLog, user, zohoAccessToken: user.zohoAccessToken });
 
         res.status(200).json({ success: true, data: null, message: 'Lead processed successfully' });
@@ -93,7 +103,6 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
       }
     }
 
-    // fallback for other events
     res.status(200).json({ success: true, data: null, message: 'Event processed' });
     return;
   } catch (error: any) {

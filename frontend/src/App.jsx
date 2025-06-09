@@ -1,6 +1,8 @@
-import React, { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthContext } from './contexts/AuthContext';
+import { useLeadNotifications } from './hooks/useLeadNotifications';
+import LeadNotification from './components/LeadNotification';
 
 import Home from './pages/Home';
 import Register from './pages/Register';
@@ -18,6 +20,11 @@ function PrivateRoute({ children }) {
 
 export default function App() {
   const { user, logout } = useContext(AuthContext);
+  const [notification, setNotification] = useState(null);
+
+  useLeadNotifications((newLead) => {
+    setNotification(newLead);
+  });
 
   return (
     <div>
@@ -58,6 +65,8 @@ export default function App() {
           )}
         </div>
       </nav>
+
+      <LeadNotification notification={notification} />
 
       <Routes>
         <Route path="/" element={<Home />} />
