@@ -36,10 +36,6 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
       Description: leadData?.interest,
     };
 
-    if (!zohoPayload.Description) {
-      throw new Error('No interest Provided');
-    }
-
     const crmResult = await withRetry(() => createLead(zohoPayload, token.accessToken), 3, 1000);
     const isSuccess = crmResult.status === 'SUCCESS';
 
