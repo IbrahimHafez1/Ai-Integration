@@ -42,42 +42,39 @@ export default function Register() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
+            <label htmlFor="name">Full Name</label>
             <input
               type="text"
               id="name"
-              placeholder=" "
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
               disabled={!!success}
             />
-            <label htmlFor="name">Full Name</label>
           </div>
 
           <div className="form-group">
+            <label htmlFor="email">Email Address</label>
             <input
               type="email"
               id="email"
-              placeholder=" "
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={!!success}
             />
-            <label htmlFor="email">Email Address</label>
           </div>
 
           <div className="form-group">
+            <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
-              placeholder=" "
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={!!success}
             />
-            <label htmlFor="password">Password</label>
           </div>
 
           <button type="submit" className="auth-btn" disabled={!!success}>

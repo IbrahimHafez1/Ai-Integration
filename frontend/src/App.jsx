@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthContext } from './contexts/AuthContext';
 import { useLeadNotifications } from './hooks/useLeadNotifications';
 import LeadNotification from './components/LeadNotification';
+import Sidebar from './components/Sidebar';
 
 import Home from './pages/Home';
 import Register from './pages/Register';
@@ -19,7 +20,7 @@ function PrivateRoute({ children }) {
 }
 
 export default function App() {
-  const { user, logout } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [notification, setNotification] = useState(null);
 
   useLeadNotifications((newLead) => {
@@ -27,103 +28,69 @@ export default function App() {
   });
 
   return (
-    <div>
-      <nav className="nav-bar">
-        <div className="nav-left">
-          <Link to="/" className="nav-brand">
-            Dragify
-          </Link>
-        </div>
-        <div className="nav-right">
-          {user ? (
-            <>
-              <Link to="/profile" className="nav-link">
-                Profile
-              </Link>
-              <Link to="/integrations" className="nav-link">
-                Integrations
-              </Link>
-              <Link to="/logs/leads" className="nav-link">
-                Lead Logs
-              </Link>
-              <Link to="/logs/crm" className="nav-link">
-                CRM Logs
-              </Link>
-              <button onClick={logout} className="nav-button">
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="nav-link">
-                Login
-              </Link>
-              <Link to="/register" className="nav-link">
-                Register
-              </Link>
-            </>
-          )}
-        </div>
-      </nav>
+    <div className="app-container">
+      <Sidebar />
 
-      <LeadNotification notification={notification} />
+      <main className={`main-content ${user ? 'with-sidebar' : ''}`}>
+        <LeadNotification notification={notification} />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
 
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
 
-        <Route
-          path="/integrations"
-          element={
-            <PrivateRoute>
-              <IntegrationsPage />
-            </PrivateRoute>
-          }
-        />
+          <Route
+            path="/integrations"
+            element={
+              <PrivateRoute>
+                <IntegrationsPage />
+              </PrivateRoute>
+            }
+          />
 
-        <Route path="/slack/callback" element={<SlackOAuthHandler />} />
+          <Route path="/slack/callback" element={<SlackOAuthHandler />} />
 
-        <Route
-          path="/logs/leads"
-          element={
-            <PrivateRoute>
-              <LeadLogs />
-            </PrivateRoute>
-          }
-        />
+          <Route
+            path="/logs/leads"
+            element={
+              <PrivateRoute>
+                <LeadLogs />
+              </PrivateRoute>
+            }
+          />
 
-        <Route
-          path="/logs/crm"
-          element={
-            <PrivateRoute>
-              <CRMLogs />
-            </PrivateRoute>
-          }
-        />
+          <Route
+            path="/logs/crm"
+            element={
+              <PrivateRoute>
+                <CRMLogs />
+              </PrivateRoute>
+            }
+          />
 
-        <Route
-          path="*"
-          element={
-            <div className="container" style={{ padding: '2rem', textAlign: 'center' }}>
-              <h2>404 - Page Not Found</h2>
-              <p>The page you're looking for doesn't exist.</p>
-              <Link to="/" className="nav-link">
-                Go to Home
-              </Link>
-            </div>
-          }
-        />
-      </Routes>
+          <Route
+            path="*"
+            element={
+              <div className="container" style={{ padding: '2rem', textAlign: 'center' }}>
+                <h2>404 - Page Not Found</h2>
+                <p>The page you're looking for doesn't exist.</p>
+                <Link to="/" className="nav-link">
+                  Go to Home
+                </Link>
+              </div>
+            }
+          />
+        </Routes>
+      </main>
     </div>
   );
 }

@@ -2,40 +2,58 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #eef2f5;
+  background: linear-gradient(135deg, #1e2746 0%, #232b4d 100%);
   min-height: 100vh;
-  padding: 2rem;
+  padding: 2.5rem 1rem;
   box-sizing: border-box;
 }
 
 .profile-card {
-  background-color: #fff;
-  padding: 2rem 3rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  background: rgba(36, 48, 78, 0.92);
+  padding: 2.5rem 2rem;
+  border-radius: 22px;
+  box-shadow: 0 8px 32px 0 rgba(80, 120, 255, 0.18), 0 2px 8px 0 rgba(36, 48, 78, 0.12);
   max-width: 400px;
   width: 100%;
   text-align: center;
+  color: #eaf1ff;
+  border: 1.5px solid #3556a3;
+  backdrop-filter: blur(3px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .profile-card h2 {
   font-size: 2rem;
   margin-bottom: 1.5rem;
-  color: #2d3748;
+  color: #7bb0ff;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px #1e2746;
 }
 
 .profile-info {
-  margin-bottom: 1rem;
-  font-size: 1.125rem;
-  color: #4a5568;
+  margin-bottom: 1.2rem;
+  font-size: 1.15rem;
+  color: #bfc4d0;
+  background: rgba(58, 91, 180, 0.1);
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  width: 100%;
+  max-width: 320px;
+  text-align: left;
+  box-shadow: 0 1px 4px 0 rgba(80, 120, 255, 0.06);
 }
 
 .profile-info strong {
-  color: #2d3748;
+  color: #7bb0ff;
+  font-weight: 700;
 }
 
 .profile-loading {
-  font-size: 1rem;
-  color: #718096;
+  font-size: 1.08rem;
+  color: #7bb0ff;
   font-style: italic;
+  margin-top: 1.5rem;
 }

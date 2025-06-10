@@ -1,37 +1,45 @@
 .lead-logs-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  background-color: #eef2f5;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #1e2746 0%, #232b4d 100%);
   min-height: 100vh;
-  padding: 2rem;
+  padding: 3rem 1rem 1rem 1rem;
   box-sizing: border-box;
 }
 
 .lead-logs-card {
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  background: rgba(36, 48, 78, 0.92);
+  padding: 2.5rem 2rem;
+  border-radius: 22px;
+  box-shadow: 0 8px 32px 0 rgba(80, 120, 255, 0.18), 0 2px 8px 0 rgba(36, 48, 78, 0.12);
   max-width: 1200px;
   width: 100%;
   overflow: hidden;
+  color: #eaf1ff;
+  border: 1.5px solid #3556a3;
+  backdrop-filter: blur(3px);
 }
 
 .lead-logs-title {
   font-size: 2rem;
   margin-bottom: 1.5rem;
-  color: #2d3748;
+  color: #7bb0ff;
   text-align: center;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px #1e2746;
 }
 
 .lead-logs-error {
-  background-color: #ffe5e5;
-  color: #b30000;
+  background: rgba(30, 39, 70, 0.85);
+  color: #ff6b81;
   padding: 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-bottom: 1rem;
   text-align: center;
+  border: 1.5px solid #ff6b81;
+  box-shadow: 0 2px 8px 0 rgba(255, 107, 129, 0.08);
 }
 
 .lead-logs-table-wrapper {
@@ -41,29 +49,35 @@
 
 .lead-logs-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 800px;
+  background: transparent;
+  color: #eaf1ff;
 }
 
 .lead-logs-table th,
 .lead-logs-table td {
-  padding: 0.75rem 1rem;
+  padding: 1rem;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #3556a3;
 }
 
 .lead-logs-table th {
-  background-color: #f5f7fa;
-  color: #4a5568;
-  font-weight: 600;
+  background: linear-gradient(90deg, #3556a3 0%, #4a69bd 100%);
+  color: #eaf1ff;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #4a69bd;
+  box-shadow: 0 2px 8px 0 rgba(80, 120, 255, 0.08);
 }
 
-.lead-logs-table tr:hover {
-  background-color: #f0f4f8;
+.lead-logs-table tr:hover td {
+  background: rgba(58, 91, 180, 0.18);
 }
 
 .lead-logs-empty {
   text-align: center;
-  color: #666;
+  color: #7bb0ff;
   padding: 1.5rem;
 }

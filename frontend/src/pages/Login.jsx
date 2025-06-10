@@ -31,27 +31,25 @@ export default function Login() {
         {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
+            <label htmlFor="email">Email Address</label>
             <input
               type="email"
               id="email"
-              placeholder=" "
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <label htmlFor="email">Email Address</label>
           </div>
 
           <div className="form-group">
+            <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
-              placeholder=" "
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <label htmlFor="password">Password</label>
           </div>
 
           <button type="submit" className="auth-btn">
