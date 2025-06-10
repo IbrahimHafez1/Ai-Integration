@@ -1,70 +1,205 @@
-# Getting Started with Create React App
+# AI App - Full Stack Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern full-stack application with React frontend and Node.js backend, featuring AI integration, OAuth authentication, and real-time communication.
+
+## Architecture
+
+This project consists of two main components:
+
+- **Backend**: Node.js/TypeScript API server with MongoDB
+- **Frontend**: React application built with Vite
+
+## Features
+
+- 🤖 AI Integration with Hugging Face
+- 🔐 OAuth Authentication (Google, Slack, Zoho)
+- 📧 Email Notifications
+- 🔌 Real-time Communication with Socket.IO
+- 📊 MongoDB Database Integration
+- 🚀 Deployed on Replit
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- MongoDB account
+- Required API keys (see Environment Variables section)
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies for both backend and frontend:
+
+```bash
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd frontend
+npm install
+cd ..
+```
+
+### Development
+
+#### Backend Development
+
+```bash
+# Build and start with auto-reload
+npm run dev
+
+# Or build and start production mode
+npm start
+```
+
+#### Frontend Development
+
+```bash
+cd frontend
+npm run dev
+```
+
+The backend will run on port 4000, and the frontend development server will typically run on port 5173.
+
+## Environment Variables
+
+### Backend (.env)
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+PORT=4000
+MONGODB_URI=your_mongodb_connection_string
+API_JWT_SECRET=your_jwt_secret
+
+# Slack OAuth
+SLACK_CLIENT_ID=your_slack_client_id
+SLACK_CLIENT_SECRET=your_slack_client_secret
+SLACK_REDIRECT_URI=your_domain/api/auth/slack/callback
+
+# Email Configuration
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=465
+EMAIL_SECURE=true
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
+EMAIL_FROM=Your App <your_email@gmail.com>
+
+# Zoho OAuth
+ZOHO_CLIENT_ID=your_zoho_client_id
+ZOHO_CLIENT_SECRET=your_zoho_client_secret
+ZOHO_REDIRECT_URI=your_domain/api/auth/zoho/callback
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=your_domain/api/auth/google/callback
+
+# AI Integration
+HF_TOKEN=your_hugging_face_token
+
+# Frontend URL
+FRONTEND_BASE_URL=your_domain
+```
+
+### Frontend (.env)
+
+Create a `.env` file in the frontend directory:
+
+```env
+VITE_API_URL=your_domain/api
+VITE_SLACK_CLIENT_ID=your_slack_client_id
+VITE_SLACK_REDIRECT_URI=your_domain/api/auth/slack/callback
+VITE_SOCKET_URL=http://localhost:4000
+```
 
 ## Available Scripts
 
-In the project directory, you can run:
+### Backend Scripts
 
-### `npm start`
+- `npm run build` - Compile TypeScript to JavaScript
+- `npm start` - Build and start the production server
+- `npm run dev` - Build and start development server with auto-reload
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Frontend Scripts
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run serve` - Preview production build
 
-### `npm test`
+## Deployment
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The application is currently deployed on Replit. For deployment:
 
-### `npm run build`
+1. Set up your environment variables in your hosting platform
+2. Build the application:
+   ```bash
+   npm run build
+   cd frontend && npm run build
+   ```
+3. Start the production server:
+   ```bash
+   npm start
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## API Endpoints
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The backend provides various API endpoints including:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Authentication routes (`/api/auth/*`)
+- User management
+- AI integration endpoints
+- Real-time socket connections
 
-### `npm run eject`
+## OAuth Setup
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+This application supports multiple OAuth providers:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Google OAuth
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable Google+ API
+4. Create OAuth 2.0 credentials
+5. Add your redirect URI
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Slack OAuth
 
-## Learn More
+1. Go to [Slack API](https://api.slack.com/apps)
+2. Create a new app
+3. Configure OAuth & Permissions
+4. Add your redirect URI
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Zoho OAuth
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. Go to [Zoho Developer Console](https://api-console.zoho.com/)
+2. Create a new application
+3. Configure OAuth settings
+4. Add your redirect URI
 
-### Code Splitting
+## Technologies Used
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- **Backend**: Node.js, TypeScript, Express.js, MongoDB, Socket.IO
+- **Frontend**: React, Vite, TypeScript
+- **Authentication**: OAuth 2.0 (Google, Slack, Zoho)
+- **AI**: Hugging Face Transformers
+- **Email**: Nodemailer with Gmail SMTP
+- **Database**: MongoDB Atlas
 
-### Analyzing the Bundle Size
+## Contributing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-### Making a Progressive Web App
+## Support
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+For questions or issues, please contact the development team or create an issue in the repository.
 
-### Advanced Configuration
+## License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is proprietary. All rights reserved.
