@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './LeadNotification.css';
 
 export default function LeadNotification({ notification }) {
   const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (notification) {
+      setVisible(true);
+    }
+  }, [notification]);
 
   if (!notification || !visible) return null;
 
