@@ -101,7 +101,6 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
           text: leadLog.text,
           createdAt: leadLog.createdAt,
         });
-        console.log({ io, leadLog });
 
         await runSlackFlow({ leadLog, user, zohoAccessToken: user.zohoAccessToken });
 
