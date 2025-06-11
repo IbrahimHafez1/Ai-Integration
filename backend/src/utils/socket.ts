@@ -7,16 +7,16 @@ let io: IOServer;
 export function initSocket(server: http.Server) {
   io = new IOServer(server, {
     cors: {
-      origin: [
-        'http://localhost:3000',
-        'http://localhost:5173',
-        'https://*.replit.dev',
-        process.env.FRONTEND_BASE_URL || '',
-      ].filter(Boolean),
+      origin: '*', // Allow all origins in development
       methods: ['GET', 'POST'],
       credentials: true,
     },
     transports: ['websocket', 'polling'],
+    path: '/socket.io',
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    cookie: false,
+    allowEIO3: true,
   });
 
   io.on('connection', (socket) => {
