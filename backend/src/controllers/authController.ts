@@ -101,25 +101,24 @@ export const googleCallback: RequestHandler = async (req, res) => {
 
     const userId = decodeURIComponent(state);
 
-    await Promise.all([
-      OAuthToken.findOneAndUpdate(
-        { userId, provider: 'google' },
-        {
-          accessToken: tokens.access_token,
-          refreshToken: tokens.refresh_token,
-          expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
-          userId,
-          provider: 'google',
-        },
-        { upsert: true, new: true },
-      ),
-      User.findByIdAndUpdate(userId, {
-        $set: {
-          gmail: profile.email,
-          googleAccessToken: tokens.access_token,
-        },
-      }),
-    ]);
+    const token = await OAuthToken.findOneAndUpdate(
+      { userId, provider: 'google' },
+      {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
+        userId,
+        provider: 'google',
+      },
+      { upsert: true, new: true },
+    );
+
+    await User.findByIdAndUpdate(userId, {
+      $set: {
+        gmail: profile.email,
+        googleAccessToken: token._id,
+      },
+    });
 
     res.redirect(`${process.env.FRONTEND_BASE_URL}/integrations`);
     return;
