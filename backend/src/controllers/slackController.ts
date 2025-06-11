@@ -6,18 +6,25 @@ import { runSlackFlow } from '../services/orchestrationService.js';
 import { parseLead } from '../services/aiService.js';
 import { getIO } from '../utils/socket.js';
 
+// Move this outside the function to persist between requests
+const seenEventIds = new Set<string>();
+
 export async function handleSlackEvents(req: Request, res: Response): Promise<void> {
   try {
     const { type, event, challenge, event_id } = req.body;
-    const seenEventIds = new Set<string>();
 
-    if (seenEventIds.has(event_id)) {
-      logger.warn('Duplicate Slack event');
+    if (event_id && seenEventIds.has(event_id)) {
+      logger.warn('Duplicate Slack event', { event_id });
       res.status(200).json({ success: true, data: null, message: 'Duplicate event' });
       return;
     }
 
-    seenEventIds.add(event_id);
+    if (event_id) {
+      seenEventIds.add(event_id);
+      if (seenEventIds.size > 1000) {
+        seenEventIds.clear();
+      }
+    }
 
     if (!type) {
       logger.warn('Missing Slack event type');
