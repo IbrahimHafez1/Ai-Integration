@@ -1,27 +1,38 @@
 import { Server as IOServer } from 'socket.io';
 import http from 'http';
+import { logger } from './logger.js';
 
 let io: IOServer;
 
 export function initSocket(server: http.Server) {
   io = new IOServer(server, {
     cors: {
-      origin: ['http://localhost:3000'],
+      origin: [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://*.replit.dev',
+        process.env.FRONTEND_BASE_URL || '',
+      ].filter(Boolean),
       methods: ['GET', 'POST'],
       credentials: true,
     },
+    transports: ['websocket', 'polling'],
   });
 
   io.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
+    logger.info(`Socket connected: ${socket.id}`);
 
     socket.on('joinRoom', (userId: string) => {
       socket.join(userId);
-      console.log(`Socket ${socket.id} joined room ${userId}`);
+      logger.info(`Socket ${socket.id} joined room ${userId}`);
     });
 
     socket.on('disconnect', () => {
-      console.log(`Socket disconnected: ${socket.id}`);
+      logger.info(`Socket disconnected: ${socket.id}`);
+    });
+
+    socket.on('error', (error) => {
+      logger.error(`Socket error: ${error.message}`);
     });
   });
 

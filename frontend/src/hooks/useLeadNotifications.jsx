@@ -12,23 +12,39 @@ export function useLeadNotifications(onLeadCreated) {
       return;
     }
 
-    const socketUrl = import.meta.env.VITE_SOCKET_URL;
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
     socket = io(socketUrl, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
     });
 
     socket.on('connect', () => {
+      console.log('Socket connected');
       socket.emit('joinRoom', user._id);
     });
 
-    socket.on('connect_error', (err) => {});
+    socket.on('connect_error', (err) => {
+      console.error('Socket connection error:', err.message);
+    });
+
+    socket.on('error', (err) => {
+      console.error('Socket error:', err.message);
+    });
 
     socket.on('leadCreated', (payload) => {
       onLeadCreated(payload);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
   }, [user, token, onLeadCreated]);
 }
