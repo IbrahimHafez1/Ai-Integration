@@ -1,53 +1,43 @@
-import fetch from 'node-fetch';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function parseLead(message: string): Promise<any> {
-  const HF_TOKEN = process.env.HF_TOKEN;
-  if (!HF_TOKEN) throw new Error('Missing HF_TOKEN in .env');
+  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+  if (!GOOGLE_API_KEY) throw new Error('Missing GOOGLE_API_KEY in .env');
 
-  const MODEL = 'mistralai/Mixtral-8x7B-Instruct-v0.1';
+  const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
   const prompt = [
-    `Extract lead details from the following Slack message:`,
-    `"${message}"`,
+    `Extract lead details from the following message into a JSON object.`,
+    `Message: "${message}"`,
     ``,
-    `Return only one STRICT JSON object with these keys:`,
-    `  • name     (string)`,
-    `  • email    (string)`,
-    `  • phone    (string)`,
-    `  • interest (string)`,
-    `  • company  (string, optional)`,
-    `Return ONLY valid JSON. No explanation. No markdown.`,
+    `Return a JSON object with these fields:`,
+    `- name (string)`,
+    `- email (string)`,
+    `- phone (string)`,
+    `- interest (string)`,
+    `- company (string, optional)`,
+    ``,
+    `Return ONLY the JSON object. No other text.`,
   ].join('\n');
 
-  const res = await fetch(`https://api-inference.huggingface.co/models/${MODEL}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${HF_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      inputs: prompt,
-      options: { wait_for_model: true },
-    }),
-  });
+  try {
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const text = response.text();
 
-  const result: any = await res.json();
-  const raw = result?.[0]?.generated_text;
-
-  if (!res.ok || !raw) {
-    throw new Error(`HF pipeline error ${res.status}:\n${JSON.stringify(result, null, 2)}`);
-  }
-
-  const matches = [...raw.matchAll(/\{[\s\S]*?\}/g)];
-
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const jsonCandidate = matches[i][0];
-    const clean = jsonCandidate.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
-    const parsed = JSON.parse(clean);
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed;
+    if (!text) {
+      throw new Error('No response from Gemini');
     }
-  }
 
-  throw new Error(`No valid JSON object parsed from model response:\n${raw}`);
+    const jsonMatch = text.match(/\{[\s\S]*?\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON object found in response');
+    }
+
+    return JSON.parse(jsonMatch[0]);
+  } catch (error: any) {
+    console.error('Gemini API error:', error);
+    throw new Error(`Failed to parse lead: ${error.message}`);
+  }
 }

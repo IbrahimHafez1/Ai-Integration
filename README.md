@@ -11,7 +11,7 @@ This project consists of two main components:
 
 ## Features
 
-- 🤖 AI Integration with Hugging Face
+- 🤖 AI Integration with google generative ai
 - 🔐 OAuth Authentication (Google, Slack, Zoho)
 - 📧 Email Notifications
 - 🔌 Real-time Communication with Socket.IO
@@ -98,7 +98,7 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_REDIRECT_URI=your_domain/api/auth/google/callback
 
 # AI Integration
-HF_TOKEN=your_hugging_face_token
+GOOGLE_API_KEY=your_google_api_key
 
 # Frontend URL
 FRONTEND_BASE_URL=your_domain
@@ -184,7 +184,7 @@ This application supports multiple OAuth providers:
 - **Backend**: Node.js, TypeScript, Express.js, MongoDB, Socket.IO
 - **Frontend**: React, Vite, TypeScript
 - **Authentication**: OAuth 2.0 (Google, Slack, Zoho)
-- **AI**: Hugging Face Transformers
+- **AI**: Google generative ai
 - **Email**: Nodemailer with Gmail SMTP
 - **Database**: MongoDB Atlas
 
