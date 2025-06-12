@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import User from '../models/User.js';
-import { LeadLog } from '../models/LeadLog.js';
+import User, { ILeanUser } from '../models/User.js';
+import { LeadLog, ILeadLog } from '../models/LeadLog.js';
 import { logger } from '../utils/logger.js';
 import { runSlackFlow } from '../services/orchestrationService.js';
-import { parseLead } from '../services/aiService.js';
 import { getIO } from '../utils/socket.js';
+import mongoose from 'mongoose';
 
 // Move this outside the function to persist between requests
 const seenEventIds = new Set<string>();
@@ -55,65 +55,79 @@ export async function handleSlackEvents(req: Request, res: Response): Promise<vo
       if (eventType === 'message' && !bot_id && text && slackUserId && channel) {
         logger.info(`Received Slack message: ${text}`);
 
-        let leadData;
-        try {
-          leadData = await parseLead(text);
-        } catch (err: any) {
-          logger.error('Error parsing lead data:', err);
-          res
-            .status(200)
-            .json({ success: true, data: null, message: 'Event processed (no lead detected)' });
-          return;
-        }
-
-        if (!leadData?.interest) {
-          logger.info('Message parsed but no interest found; skipping lead creation');
-          res
-            .status(200)
-            .json({ success: true, data: null, message: 'No lead interest found; event ignored' });
-          return;
-        }
-
-        const leadLog = await LeadLog.create({
+        const newLeadLog = (await LeadLog.create({
           text,
           slackUserId,
           channelId: channel,
           eventType,
-          parsedInterest: leadData.interest,
-        });
+        })) as ILeadLog & { _id: mongoose.Types.ObjectId };
 
-        const user = await User.findOne({ slackUserId }).lean();
-        if (!user) {
+        // Find user and convert ObjectId to string for downstream processing
+        const userDoc = await User.findOne({ slackUserId });
+        if (!userDoc) {
           logger.warn(`No internal user linked for Slack ID ${slackUserId}`);
           res.status(404).json({ success: false, data: null, message: 'User not linked' });
           return;
         }
-        if (!user.zohoAccessToken) {
-          logger.warn(`User ${user._id} has no Zoho token; skipping CRM flow`);
+
+        const userId = (userDoc._id as mongoose.Types.ObjectId).toString();
+
+        if (!userDoc.zohoAccessToken) {
+          logger.warn(`User ${userId} has no Zoho token; skipping CRM flow`);
           res.status(200).json({ success: true, data: null, message: 'No Zoho token' });
           return;
         }
 
-        const io = getIO();
-        io.to(String(user._id)).emit('leadCreated', {
-          leadId: leadLog._id,
-          interest: leadData.interest,
-          text: leadLog.text,
-          createdAt: leadLog.createdAt,
-        });
+        try {
+          const userForFlow: ILeanUser = {
+            ...userDoc.toObject(),
+            _id: userId,
+          };
 
-        await runSlackFlow({ leadLog, user, zohoAccessToken: user.zohoAccessToken });
+          const result = await runSlackFlow({
+            leadLog: {
+              _id: (newLeadLog._id as mongoose.Types.ObjectId).toString(),
+              text: newLeadLog.text,
+            },
+            user: userForFlow,
+          });
 
-        res.status(200).json({ success: true, data: null, message: 'Lead processed successfully' });
-        return;
+          // Emit socket event with result
+          const io = getIO();
+          io.to(userId).emit('leadCreated', {
+            leadId: (newLeadLog._id as mongoose.Types.ObjectId).toString(),
+            text: newLeadLog.text,
+            createdAt: newLeadLog.createdAt,
+            status: result.status,
+          });
+
+          res.status(200).json({
+            success: true,
+            data: { leadId: newLeadLog._id.toString(), status: result.status },
+            message: 'Lead processed successfully',
+          });
+          return;
+        } catch (error: any) {
+          logger.error('Error in Slack flow:', error);
+          res.status(500).json({
+            success: false,
+            data: null,
+            message: error.message || 'Error processing lead',
+          });
+          return;
+        }
       }
     }
 
     res.status(200).json({ success: true, data: null, message: 'Event processed' });
     return;
   } catch (error: any) {
-    logger.error('Slack event handler error', { error: error.message, stack: error.stack });
-    res.status(500).json({ success: false, data: null, message: 'Internal server error' });
+    logger.error('Error handling Slack event:', error);
+    res.status(500).json({
+      success: false,
+      data: null,
+      message: error.message || 'Internal server error',
+    });
     return;
   }
 }

@@ -1,6 +1,22 @@
 import { Schema, model, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+export interface ILeanUser {
+  _id: string;
+  email: string;
+  gmail?: string;
+  name: string;
+  password: string;
+  isActive: boolean;
+  slackUserId?: string;
+  slackAccessToken?: string;
+  googleAccessToken?: string;
+  zohoAccessToken?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Include all necessary Mongoose Document methods and properties
 export interface IUser extends Document {
   email: string;
   gmail?: string;
@@ -11,7 +27,14 @@ export interface IUser extends Document {
   slackAccessToken?: string;
   googleAccessToken?: string;
   zohoAccessToken?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Custom methods
   comparePassword(candidate: string): Promise<boolean>;
+
+  // Make it compatible with lean() operations
+  toObject(options?: any): ILeanUser;
 }
 
 const userSchema = new Schema<IUser>(

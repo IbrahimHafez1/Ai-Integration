@@ -18,5 +18,16 @@ export default {
       clientSecret: process.env.SLACK_CLIENT_SECRET as string,
       redirectUri: process.env.SLACK_REDIRECT_URI as string,
     },
+    zoho: {
+      clientId: process.env.ZOHO_CLIENT_ID as string,
+      clientSecret: process.env.ZOHO_CLIENT_SECRET as string,
+      redirectUri: process.env.ZOHO_REDIRECT_URI as string,
+    },
+    google: {
+      client: undefined,
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      redirectUri: process.env.GOOGLE_REDIRECT_URI as string,
+    },
   },
 };

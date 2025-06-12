@@ -1,22 +1,64 @@
-import axios from 'axios';
+import { logger } from '../utils/logger.js';
+import { ensureValidToken } from '../utils/tokenRefresher.js';
 
 interface ZohoPayload {
   [key: string]: any;
 }
 
-export async function createLead(leadData: ZohoPayload, accessToken: string) {
-  const url = `https://www.zohoapis.com/crm/v2/Leads`;
+interface ZohoResponse {
+  id: string;
+  status: string;
+  message: string;
+  raw?: any;
+}
+
+/**
+ * Service level functions for CRM operations - mostly used by agent tools
+ */
+export async function getValidZohoToken(userId: string): Promise<string> {
+  return ensureValidToken(userId, 'zoho');
+}
+
+export async function zohoApiCall<T>(
+  path: string,
+  method: string,
+  data: any,
+  accessToken: string,
+): Promise<T> {
+  const url = `https://www.zohoapis.com/crm/v2/${path}`;
   const headers = {
     Authorization: `Zoho-oauthtoken ${accessToken}`,
     'Content-Type': 'application/json',
   };
 
-  const body = { data: [leadData] };
+  try {
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+    });
 
-  const resp = await axios.post(url, body, { headers });
+    if (!response.ok) {
+      const error = await response.json();
+      logger.error('Zoho API error:', error);
+      throw new Error(`Zoho API error: ${error.message || response.statusText}`);
+    }
 
-  if (resp.data && resp.data.data && resp.data.data.length > 0) {
-    const record = resp.data.data[0];
+    return response.json();
+  } catch (error) {
+    logger.error(`Zoho API call failed for ${path}:`, error);
+    throw error;
+  }
+}
+
+export async function createLead(
+  leadData: ZohoPayload,
+  accessToken: string,
+): Promise<ZohoResponse> {
+  const response = await zohoApiCall<any>('Leads', 'POST', { data: [leadData] }, accessToken);
+
+  if (response?.data?.[0]) {
+    const record = response.data[0];
     return {
       id: record.details.id,
       status: record.status.toUpperCase(),
@@ -28,4 +70,8 @@ export async function createLead(leadData: ZohoPayload, accessToken: string) {
   throw new Error('Zoho CRM did not return expected response');
 }
 
-export default { createLead };
+export default {
+  createLead,
+  getValidZohoToken,
+  zohoApiCall,
+};
