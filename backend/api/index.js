@@ -1,4 +1,4 @@
-// Serverless entry point for Vercel
 import app from '../dist/server.js';
+import serverless from 'serverless-http';
 
-export default app;
+export const handler = serverless(app);
