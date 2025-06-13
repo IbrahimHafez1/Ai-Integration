@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import User, { ILeanUser } from '../models/User.js';
 import { LeadLog, ILeadLog } from '../models/LeadLog.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 import { runSlackFlow } from '../services/orchestrationService.js';
 import { getIO } from '../utils/socket.js';
 import mongoose from 'mongoose';

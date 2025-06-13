@@ -1,7 +1,7 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { ensureValidToken } from '../utils/tokenRefresher.js';
-import { logger } from './logger.js';
+import logger from './logger.js';
 
 export function createLeadTools(userId: string) {
   return [

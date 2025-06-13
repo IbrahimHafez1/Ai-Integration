@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import { connectDB } from './database/data-source.js';
-import { logger } from './utils/logger.js';
+import logger from './utils/logger.js';
 import router from './routes/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { initSocket } from './utils/socket.js';
@@ -34,24 +34,29 @@ const httpServer = http.createServer(app);
 app.set('trust proxy', 1);
 
 // Configure CORS
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_BASE_URL 
-    : ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_BASE_URL
+        : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-app.use(helmet({
-  crossOriginResourcePolicy: false,
-  crossOriginOpenerPolicy: false,
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false,
+  }),
+);
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -71,7 +76,7 @@ const __dirname = path.dirname(__filename);
 if (process.env.NODE_ENV === 'production') {
   const frontendPath = path.resolve(__dirname, '../../frontend/dist');
   app.use(express.static(frontendPath));
-  
+
   app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
   });

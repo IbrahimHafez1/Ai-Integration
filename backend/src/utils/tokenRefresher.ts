@@ -1,11 +1,14 @@
 import { OAuthToken } from '../models/OAuthToken.js';
 import axios from 'axios';
 import config from '../config/index.js';
-import { logger } from './logger.js';
+import logger from './logger.js';
 
-export async function ensureValidToken(userId: string, provider: 'zoho' | 'google'): Promise<string> {
+export async function ensureValidToken(
+  userId: string,
+  provider: 'zoho' | 'google',
+): Promise<string> {
   const token = await OAuthToken.findOne({ userId, provider });
-  
+
   if (!token) {
     throw new Error(`No ${provider} token found for user`);
   }
@@ -29,7 +32,7 @@ export async function ensureValidToken(userId: string, provider: 'zoho' | 'googl
         }),
         {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        }
+        },
       );
 
       newToken = {
@@ -41,7 +44,7 @@ export async function ensureValidToken(userId: string, provider: 'zoho' | 'googl
       const oauth2Client = new google.auth.OAuth2(
         config.oauth.google.clientId,
         config.oauth.google.clientSecret,
-        config.oauth.google.redirectUri
+        config.oauth.google.redirectUri,
       );
       oauth2Client.setCredentials({
         refresh_token: token.refreshToken,

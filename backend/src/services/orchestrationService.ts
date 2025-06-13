@@ -1,6 +1,6 @@
 import { CRMStatusLog } from '../models/CRMStatusLog.js';
 import { sendMail } from './emailService.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 import { parseLead } from './aiService.js';
 import { withRetry } from '../utils/retry.js';
 import type { ILeanUser } from '../models/User.js';

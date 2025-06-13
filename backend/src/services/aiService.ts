@@ -2,7 +2,7 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { AgentExecutor, createStructuredChatAgent } from 'langchain/agents';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { createLeadTools, LEAD_AGENT_PROMPT } from '../utils/agentTools.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 // Create a helper function to safely format JSON examples
 function createStrictOutputInstructions() {
