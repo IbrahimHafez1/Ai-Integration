@@ -1,20 +1,35 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    host: true, // Listen on all addresses
     proxy: {
       '/api': {
-        target: 'https://5d0c739d-620b-4833-b270-6da5909ef27a-00-38en1hwbeb1oi.kirk.replit.dev',
+        target: 'http://127.0.0.1:4000',
         changeOrigin: true,
         secure: false,
+        ws: true,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Request:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received Response:', proxyRes.statusCode, req.url);
+          });
+        }
       },
       '/socket.io': {
-        target: 'https://5d0c739d-620b-4833-b270-6da5909ef27a-00-38en1hwbeb1oi.kirk.replit.dev',
-        ws: true,
-      },
-    },
-  },
+        target: 'http://127.0.0.1:4000',
+        changeOrigin: true,
+        ws: true
+      }
+    }
+  }
 });
