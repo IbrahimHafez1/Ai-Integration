@@ -11,6 +11,9 @@
   },
   "keywords": [],
   "author": "",
+  "engines": {
+    "node": "18.x"
+  },
   "license": "ISC",
   "description": "",
   "dependencies": {
