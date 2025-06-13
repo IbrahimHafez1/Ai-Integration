@@ -1,6 +1,6 @@
 import { Server as IOServer } from 'socket.io';
 import http from 'http';
-import { logger } from './logger.js';
+import logger from './logger.js';
 
 let io: IOServer;
 

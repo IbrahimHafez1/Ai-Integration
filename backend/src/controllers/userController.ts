@@ -4,7 +4,7 @@ import config from '../config/index.js';
 import { sendSuccess } from '../utils/response.js';
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import { ApiError } from '../utils/errors.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 export async function register(req: Request, res: Response, next: NextFunction) {
   try {

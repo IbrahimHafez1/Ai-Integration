@@ -6,7 +6,7 @@ import { google } from 'googleapis';
 import { OAuthToken } from '../models/OAuthToken.js';
 import axios from 'axios';
 import User from '../models/User.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 export function redirectToSlack(req: any, res: Response) {
   const { clientId, redirectUri } = config.oauth.slack;
