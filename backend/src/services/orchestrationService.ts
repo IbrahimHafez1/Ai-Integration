@@ -14,21 +14,13 @@ export interface RunSlackFlowParams {
 }
 
 function sanitizeTextForProcessing(text: string): string {
-  // Remove or escape characters that could cause template literal issues
-  // Replace backticks to prevent template literal execution
-  // Replace ${} patterns to prevent variable interpolation
-  return text
-    .replace(/`/g, "'") // Replace backticks with single quotes
-    .replace(/\$\{/g, '$\\{') // Escape template literal variable patterns
-    .trim();
+  return text.replace(/`/g, "'").replace(/\$\{/g, '$\\{').trim();
 }
 
 export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
   try {
-    // The agent will handle all the processing and CRM interaction
     const parseResult = await withRetry(
       async () => {
-        // Properly sanitize the text to prevent template literal issues
         const sanitizedText = sanitizeTextForProcessing(leadLog.text);
         return parseLead(sanitizedText, user._id);
       },
@@ -37,8 +29,9 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
     );
 
     const isSuccess = parseResult.status === 'SUCCESS';
+    const observationData = JSON.parse(parseResult.intermediateSteps[3].observation);
+    const leadId = observationData.id;
 
-    // Log the result
     await CRMStatusLog.create({
       leadLogId: leadLog._id,
       status: isSuccess ? 'SUCCESS' : 'FAILURE',
@@ -46,7 +39,6 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
       userId: user._id,
     });
 
-    // Send email notification
     const recipientEmail = user?.gmail;
     if (recipientEmail) {
       try {
@@ -54,7 +46,7 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
           to: recipientEmail,
           subject: isSuccess ? 'New Zoho Lead Created' : 'Zoho Lead Creation Failed',
           text: isSuccess
-            ? `✅ Lead created in Zoho (ID: ${parseResult.id})`
+            ? `✅ Lead created in Zoho (ID: ${leadId})`
             : `❌ Error creating lead:\n${parseResult.message || 'Unknown error'}`,
         });
       } catch (emailErr) {
@@ -66,7 +58,6 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
   } catch (error: any) {
     logger.error(`runSlackFlow failed for LeadLog ${leadLog._id}:`, error);
 
-    // Log the failure
     await CRMStatusLog.create({
       leadLogId: leadLog._id,
       status: 'FAILURE',

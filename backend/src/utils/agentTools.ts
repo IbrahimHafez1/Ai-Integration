@@ -25,18 +25,16 @@ export function createLeadTools(userId: string) {
         input: z.string().describe('Full name or text containing a name to format'),
       }),
       func: async ({ input }) => {
-        // Improved name extraction patterns
         const namePatterns = [
           /my name is ([A-Za-z]+(?:\s+[A-Za-z]+)*)/i,
           /i am ([A-Za-z]+(?:\s+[A-Za-z]+)*)/i,
           /i'm ([A-Za-z]+(?:\s+[A-Za-z]+)*)/i,
           /this is ([A-Za-z]+(?:\s+[A-Za-z]+)*)/i,
-          /^([A-Za-z]+(?:\s+[A-Za-z]+)*)/i, // Name at the beginning
+          /^([A-Za-z]+(?:\s+[A-Za-z]+)*)/i,
         ];
 
         let fullName = '';
 
-        // Try to extract name using patterns
         for (const pattern of namePatterns) {
           const match = input.match(pattern);
           if (match && match[1]) {
@@ -45,10 +43,8 @@ export function createLeadTools(userId: string) {
           }
         }
 
-        // If no pattern matched, check if input looks like a simple name
         if (!fullName) {
           const words = input.trim().split(/\s+/);
-          // Only treat as name if it's 1-3 words and all are alphabetic
           if (words.length <= 3 && words.every((word) => /^[A-Za-z]+$/.test(word))) {
             fullName = input.trim();
           }
@@ -62,7 +58,6 @@ export function createLeadTools(userId: string) {
           });
         }
 
-        // No valid name found
         return JSON.stringify({
           firstName: '',
           lastName: 'Unknown',
@@ -101,11 +96,9 @@ export function createLeadTools(userId: string) {
           }
         }
 
-        // Simple fallback for "at CompanyName" patterns
         const simpleMatch = input.match(/(?:at|for|with)\s+([A-Z][A-Za-z0-9\s]+)/i);
         if (simpleMatch && simpleMatch[1]) {
           const company = simpleMatch[1].trim();
-          // Only return if it looks like a company name (not too long, proper case)
           if (company.length <= 50 && /^[A-Z]/.test(company)) {
             return company;
           }
@@ -129,12 +122,10 @@ export function createLeadTools(userId: string) {
         try {
           const leadData = JSON.parse(input);
 
-          // Validate required fields
           if (!leadData.First_Name && !leadData.Email && !leadData.Phone) {
             throw new Error('Lead must have at least a name, email, or phone number');
           }
 
-          // Ensure Last_Name is not too long (Zoho has field limits)
           if (leadData.Last_Name && leadData.Last_Name.length > 100) {
             leadData.Last_Name = leadData.Last_Name.substring(0, 100);
           }
@@ -155,12 +146,10 @@ export function createLeadTools(userId: string) {
 
           if (!resp.ok) {
             const errorText = await resp.text();
-            logger.error('Zoho API error response:', errorText);
             throw new Error(`Zoho API error: ${resp.statusText} - ${errorText}`);
           }
 
           const data = await resp.json();
-          logger.info('Zoho API response:', data);
 
           if (data?.data?.[0]) {
             const record = data.data[0];
