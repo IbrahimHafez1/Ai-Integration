@@ -1,13 +1,26 @@
 import { Server as IOServer } from 'socket.io';
 import http from 'http';
 import logger from './logger.js';
+import config from '../config/index.js';
 
 let io: IOServer;
 
 export function initSocket(server: http.Server) {
+  const allowedOrigins = config.nodeEnv === 'production'
+    ? [
+        'https://ai-integration-1ojr.vercel.app',
+        config.frontend.baseUrl,
+      ]
+    : [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5173',
+      ];
+
   io = new IOServer(server, {
     cors: {
-      origin: '*', // Allow all origins in development
+      origin: allowedOrigins,
       methods: ['GET', 'POST'],
       credentials: true,
     },

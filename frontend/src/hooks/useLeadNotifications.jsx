@@ -12,7 +12,7 @@ export function useLeadNotifications(onLeadCreated) {
       return;
     }
 
-    const socketUrl = window.location.origin.replace('http', 'ws');
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000';
 
     socket = io(socketUrl, {
       auth: { token },
@@ -23,7 +23,7 @@ export function useLeadNotifications(onLeadCreated) {
       reconnectionDelayMax: 5000,
       timeout: 20000,
       path: '/socket.io',
-      secure: true,
+      secure: socketUrl.startsWith('https'),
       rejectUnauthorized: false,
     });
 
