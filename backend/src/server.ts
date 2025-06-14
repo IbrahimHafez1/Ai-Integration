@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 }
-console.log(1);
+
 const app = express();
 const httpServer = http.createServer(app);
 
