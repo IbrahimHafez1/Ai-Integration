@@ -60,7 +60,7 @@ app.use(
 app.use(express.json());
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
-app.use('/', router);
+app.use('/api', router);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
