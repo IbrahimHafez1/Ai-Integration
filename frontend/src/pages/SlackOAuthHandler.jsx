@@ -18,11 +18,14 @@ export default function SlackOAuthHandler() {
       setModal({ title: 'Error', message: 'Missing OAuth parameters.' });
       return;
     }
+    
+    const userId = decodeURIComponent(state);
+    
     axios
       .get('/api/slack/save-token', {
         params: {
           code,
-          userId: state,
+          userId,
         },
         headers: {
           Authorization: `Bearer ${token}`,

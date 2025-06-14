@@ -10,12 +10,21 @@ import logger from '../utils/logger.js';
 
 export function redirectToSlack(req: any, res: Response) {
   const { clientId, redirectUri } = config.slack;
+  const { userId } = req.query;
 
   const slackUrl = new URL('https://slack.com/oauth/v2/authorize');
   slackUrl.searchParams.set('client_id', clientId);
   slackUrl.searchParams.set('scope', 'channels:read,channels:history,users:read');
   slackUrl.searchParams.set('redirect_uri', redirectUri);
-  return res.redirect(slackUrl.toString());
+
+  if (userId) {
+    const userIdString = String(userId);
+    slackUrl.searchParams.set('state', encodeURIComponent(userIdString));
+  }
+
+  const finalUrl = slackUrl.toString();
+
+  return res.redirect(finalUrl);
 }
 
 function isString(value: unknown): value is string {
@@ -33,7 +42,7 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
       throw new ApiError('Missing state parameter', 400);
     }
 
-    const redirectUrl = `${config.frontend}/slack/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+    const redirectUrl = `${config.frontend.baseUrl}/slack/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
     return res.redirect(redirectUrl);
   } catch (error) {
     next(error);
@@ -120,7 +129,7 @@ export const googleCallback: RequestHandler = async (req, res) => {
       },
     });
 
-    res.redirect(`${process.env.FRONTEND_BASE_URL}/integrations`);
+    res.redirect(`${config.frontend.baseUrl}/integrations`);
     return;
   } catch (err: any) {
     console.error('Google OAuth error:', err);
@@ -148,7 +157,7 @@ export const zohoAuth = (req: any, res: Response) => {
 
 export const zohoCallback: RequestHandler = async (req: any, res: Response): Promise<void> => {
   const { code, state } = req.query;
-  const userId = state;
+  const userId = decodeURIComponent(state);
 
   if (!code || !userId) {
     res.status(400).send('Missing code or user');
@@ -191,7 +200,7 @@ export const zohoCallback: RequestHandler = async (req: any, res: Response): Pro
 
     await User.findOneAndUpdate({ _id: userId }, { zohoAccessToken: token._id });
 
-    res.redirect(`${config.frontend}/integrations`);
+    res.redirect(`${config.frontend.baseUrl}/integrations`);
 
     return;
   } catch (err) {
