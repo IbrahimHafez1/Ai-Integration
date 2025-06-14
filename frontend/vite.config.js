@@ -1,3 +1,4 @@
+// vite.config.ts or vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -7,12 +8,12 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://ai-integration-evmk.vercel.app',
+        target: 'http://localhost:4000',
         changeOrigin: true,
         secure: false,
       },
       '/socket.io': {
-        target: 'https://ai-integration-evmk.vercel.app',
+        target: 'http://localhost:4000',
         ws: true,
       },
     },

@@ -1,13 +1,15 @@
-import axios from 'axios';
+import api from './api';
 
-export async function getLeadLogs(token) {
-  const resp = await axios.get('/api/logs/leads', {
+export const getLeadLogs = async (token) => {
+  const res = await api.get('/logs/leads', {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return resp.data.data;
-}
+  return res.data.data;
+};
 
-export async function getCRMLogs(token) {
-  const resp = await axios.get('/api/logs/crm', { headers: { Authorization: `Bearer ${token}` } });
-  return resp.data.data;
-}
+export const getCRMLogs = async (token) => {
+  const res = await api.get('/logs/crm', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.data;
+};
