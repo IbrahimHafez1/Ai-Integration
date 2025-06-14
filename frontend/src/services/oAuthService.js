@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 export function redirectToSlackOAuth(userId) {
+  const userIdString = String(userId);
   const clientId = import.meta.env.VITE_SLACK_CLIENT_ID;
   const redirectUri = encodeURIComponent(import.meta.env.VITE_SLACK_REDIRECT_URI);
-  const state = encodeURIComponent(userId);
+  const state = encodeURIComponent(userIdString);
 
   const slackOauthUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=channels:read,chat:write&redirect_uri=${redirectUri}&state=${state}`;
 
@@ -11,11 +12,13 @@ export function redirectToSlackOAuth(userId) {
 }
 
 export function redirectToGoogle(userId) {
-  window.location.href = `${import.meta.env.VITE_API_URL}/auth/google?userId=${userId}`;
+  const userIdString = String(userId);
+  window.location.href = `${import.meta.env.VITE_API_URL}/auth/google?userId=${userIdString}`;
 }
 
 export function redirectToZoho(userId) {
-  window.location.href = `${import.meta.env.VITE_API_URL}/auth/zoho?userId=${userId}`;
+  const userIdString = String(userId);
+  window.location.href = `${import.meta.env.VITE_API_URL}/auth/zoho?userId=${userIdString}`;
 }
 
 export async function checkOAuthStatus(token) {

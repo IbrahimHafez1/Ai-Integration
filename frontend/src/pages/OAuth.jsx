@@ -42,15 +42,18 @@ export default function IntegrationsPage() {
       message: `Redirecting to ${providerName} for connection...`,
     });
 
+    // Ensure user._id is converted to string to avoid [object Object] issue
+    const userIdString = String(user._id);
+
     switch (provider) {
       case 'slack':
-        redirectToSlackOAuth(user._id);
+        redirectToSlackOAuth(userIdString);
         break;
       case 'google':
-        redirectToGoogle(user._id);
+        redirectToGoogle(userIdString);
         break;
       case 'zoho':
-        redirectToZoho(user._id);
+        redirectToZoho(userIdString);
         break;
       default:
         setModal({ visible: false, title: '', message: '' });

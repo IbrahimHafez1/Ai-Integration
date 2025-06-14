@@ -29,7 +29,8 @@ export function useLeadNotifications(onLeadCreated) {
 
     socket.on('connect', () => {
       console.log('Socket connected');
-      socket.emit('joinRoom', user._id);
+
+      socket.emit('joinRoom', String(user._id));
     });
 
     socket.on('connect_error', (err) => {

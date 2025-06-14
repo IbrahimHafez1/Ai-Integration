@@ -66,7 +66,14 @@ export async function profile(req: Request, res: Response, next: NextFunction) {
     const userId = (req as any).user._id;
     const user = await User.findById(userId).select('name email isActive').lean();
     if (!user) throw new ApiError('User not found', 404);
-    sendSuccess(res, user, 'User profile');
+    
+    // Ensure _id is converted to string to avoid [object Object] in frontend
+    const userResponse = {
+      ...user,
+      _id: user._id.toString()
+    };
+    
+    sendSuccess(res, userResponse, 'User profile');
     return;
   } catch (err) {
     next(err);

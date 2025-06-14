@@ -131,7 +131,7 @@ export const googleCallback: RequestHandler = async (req, res) => {
 
 export const zohoAuth = (req: any, res: Response) => {
   const { userId } = req.query;
-  const state = encodeURIComponent(userId);
+  const state = encodeURIComponent(String(userId));
   const params = new URLSearchParams({
     client_id: process.env.ZOHO_CLIENT_ID!,
     redirect_uri: process.env.ZOHO_REDIRECT_URI!,
