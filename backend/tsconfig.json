@@ -7,14 +7,20 @@
     "allowSyntheticDefaultImports": true,
     "strict": false,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": false,
     "outDir": "./dist",
     "rootDir": "./src",
     "sourceMap": false,
     "declaration": false,
     "resolveJsonModule": true,
-    "incremental": false
+    "allowJs": false,
+    "incremental": false,
+    "noEmitOnError": false,
+    "isolatedModules": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
+  "compileOnSave": false
 }
