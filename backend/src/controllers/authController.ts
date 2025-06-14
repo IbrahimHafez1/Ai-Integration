@@ -9,7 +9,7 @@ import User from '../models/User.js';
 import logger from '../utils/logger.js';
 
 export function redirectToSlack(req: any, res: Response) {
-  const { clientId, redirectUri } = config.oauth.slack;
+  const { clientId, redirectUri } = config.slack;
 
   const slackUrl = new URL('https://slack.com/oauth/v2/authorize');
   slackUrl.searchParams.set('client_id', clientId);
@@ -33,7 +33,7 @@ export async function handleSlackCallback(req: Request, res: Response, next: Nex
       throw new ApiError('Missing state parameter', 400);
     }
 
-    const redirectUrl = `${config.frontendBaseUrl}/slack/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+    const redirectUrl = `${config.frontend}/slack/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
     return res.redirect(redirectUrl);
   } catch (error) {
     next(error);
@@ -191,7 +191,7 @@ export const zohoCallback: RequestHandler = async (req: any, res: Response): Pro
 
     await User.findOneAndUpdate({ _id: userId }, { zohoAccessToken: token._id });
 
-    res.redirect(`${config.frontendBaseUrl}/integrations`);
+    res.redirect(`${config.frontend}/integrations`);
 
     return;
   } catch (err) {

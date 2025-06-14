@@ -7,10 +7,10 @@ import User from '../models/User.js';
 export async function exchangeSlackCodeAndSave(userId: string, code: string) {
   const tokenUrl = 'https://slack.com/api/oauth.v2.access';
   const params = new URLSearchParams({
-    client_id: config.oauth.slack.clientId,
-    client_secret: config.oauth.slack.clientSecret,
+    client_id: config.slack.clientId,
+    client_secret: config.slack.clientSecret,
     code,
-    redirect_uri: config.oauth.slack.redirectUri,
+    redirect_uri: config.slack.redirectUri,
   });
 
   let resp;
