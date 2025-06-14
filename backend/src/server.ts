@@ -33,20 +33,13 @@ const httpServer = http.createServer(app);
 
 app.set('trust proxy', 1);
 
-// Configure CORS
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_BASE_URL
-        : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: '*',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
 
-// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
