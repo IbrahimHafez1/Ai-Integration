@@ -39,6 +39,39 @@
 .notification-message {
   font-size: 14px;
   color: #374151; /* gray-700 */
+  margin-bottom: 6px;
+}
+
+.notification-status {
+  font-size: 13px;
+  color: #374151; /* gray-700 */
+  margin-bottom: 4px;
+}
+
+.notification-id {
+  font-size: 12px;
+  color: #6b7280; /* gray-500 */
+  margin-bottom: 0;
+}
+
+.lead-text {
+  font-weight: 500;
+  color: #2563eb; /* blue-600 */
+}
+
+.status-badge {
+  font-weight: 500;
+  color: #059669; /* green-600 */
+  background-color: #d1fae5; /* green-100 */
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.lead-id {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #6b7280; /* gray-500 */
 }
 
 .interest {

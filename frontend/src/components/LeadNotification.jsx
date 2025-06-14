@@ -7,6 +7,12 @@ export default function LeadNotification({ notification }) {
   useEffect(() => {
     if (notification) {
       setVisible(true);
+
+      const timer = setTimeout(() => {
+        setVisible(false);
+      }, 10000);
+
+      return () => clearTimeout(timer);
     }
   }, [notification]);
 
@@ -18,8 +24,18 @@ export default function LeadNotification({ notification }) {
         <div className="notification-text">
           <p className="notification-title">🎉 New Lead Notification</p>
           <p className="notification-message">
-            A new lead is interested in <span className="interest">{notification.interest}</span>.
+            <strong>Lead Text:</strong> <span className="lead-text">{notification.text}</span>
           </p>
+          {notification.status && (
+            <p className="notification-status">
+              <strong>Status:</strong> <span className="status-badge">{notification.status}</span>
+            </p>
+          )}
+          {notification.leadId && (
+            <p className="notification-id">
+              <strong>Lead ID:</strong> <span className="lead-id">{notification.leadId}</span>
+            </p>
+          )}
         </div>
         <button className="close-button" onClick={() => setVisible(false)} aria-label="Close">
           &times;
