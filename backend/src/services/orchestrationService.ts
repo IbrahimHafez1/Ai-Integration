@@ -29,8 +29,20 @@ export async function runSlackFlow({ leadLog, user }: RunSlackFlowParams) {
     );
 
     const isSuccess = parseResult.status === 'SUCCESS';
-    const observationData = JSON.parse(parseResult.intermediateSteps[3].observation);
-    const leadId = observationData.id;
+
+    const steps = parseResult.intermediateSteps;
+    const observationsWithId = steps
+      .map((step: any) => {
+        try {
+          const obs = JSON.parse(step.observation);
+          return obs && obs.id ? obs : null;
+        } catch {
+          return null;
+        }
+      })
+      .filter((obs: any) => obs !== null);
+
+    const leadId = observationsWithId.length > 0 ? observationsWithId[0].id : null;
 
     await CRMStatusLog.create({
       leadLogId: leadLog._id,
