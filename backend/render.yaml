@@ -8,4 +8,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: FRONTEND_BASE_URL
+        value: https://ai-integration-1ojr.vercel.app
     autoDeploy: false

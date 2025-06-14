@@ -62,19 +62,49 @@ app.set('trust proxy', 1);
 
 app.use(
   cors({
-    origin:
-      config.nodeEnv === 'production'
-        ? [config.frontend.baseUrl, 'https://*.vercel.app'] // Allow Vercel domains
-        : [
-            'http://localhost:3000',
-            'http://localhost:5173',
-            'http://127.0.0.1:3000',
-            'http://127.0.0.1:5173',
-          ],
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins =
+        config.nodeEnv === 'production'
+          ? [
+              config.frontend.baseUrl,
+              'https://ai-integration-1ojr.vercel.app',
+              'https://chat-app-hq3n.onrender.com',
+            ]
+          : [
+              'http://localhost:3000',
+              'http://localhost:5173',
+              'http://127.0.0.1:3000',
+              'http://127.0.0.1:5173',
+            ];
+
+      // Check if origin is in allowed list or is a Vercel app domain
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        (config.nodeEnv === 'production' && origin.endsWith('.vercel.app'));
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        logger.warn(`CORS blocked origin: ${origin}`);
+        callback(new Error(`Origin ${origin} not allowed by CORS policy`));
+      }
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+    ],
+    exposedHeaders: ['Content-Length', 'X-Request-ID'],
     optionsSuccessStatus: 200,
+    preflightContinue: false,
   }),
 );
 
@@ -86,6 +116,11 @@ app.get('/health', (req, res) => {
     environment: config.nodeEnv,
     version: process.env.npm_package_version || '1.0.0',
   });
+});
+
+// Explicit OPTIONS handler for preflight requests
+app.options('*', (req, res) => {
+  res.status(200).end();
 });
 
 app.use(
