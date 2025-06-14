@@ -7,7 +7,7 @@ export interface AuthRequest extends Request {
   user?: { _id: string; email: string };
 }
 
-export const ensureAuth = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const ensureAuth = (req: Request & AuthRequest, res: Response, next: NextFunction) => {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
     return next(new ApiError('Unauthorized', 401));

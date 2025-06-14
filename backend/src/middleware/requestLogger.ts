@@ -6,7 +6,7 @@ export interface RequestWithContext extends Request {
   startTime?: number;
 }
 
-export const requestLogger = (req: RequestWithContext, res: Response, next: NextFunction) => {
+export const requestLogger = (req: Request & RequestWithContext, res: Response, next: NextFunction) => {
   // Generate unique request ID
   req.requestId = Math.random().toString(36).substring(2, 15);
   req.startTime = Date.now();
