@@ -19,7 +19,7 @@ export function redirectToZoho(userId) {
 }
 
 export async function checkOAuthStatus(token) {
-  const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/check-tokens`, {
+  const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/check-tokens`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
