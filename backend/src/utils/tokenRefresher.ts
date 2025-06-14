@@ -26,8 +26,8 @@ export async function ensureValidToken(
         'https://accounts.zoho.com/oauth/v2/token',
         new URLSearchParams({
           refresh_token: token.refreshToken,
-          client_id: config.oauth.zoho.clientId,
-          client_secret: config.oauth.zoho.clientSecret,
+          client_id: config.zoho.clientId,
+          client_secret: config.zoho.clientSecret,
           grant_type: 'refresh_token',
         }),
         {
@@ -42,9 +42,9 @@ export async function ensureValidToken(
     } else if (provider === 'google') {
       const { google } = await import('googleapis');
       const oauth2Client = new google.auth.OAuth2(
-        config.oauth.google.clientId,
-        config.oauth.google.clientSecret,
-        config.oauth.google.redirectUri,
+        config.google.clientId,
+        config.google.clientSecret,
+        config.google.redirectUri,
       );
       oauth2Client.setCredentials({
         refresh_token: token.refreshToken,
