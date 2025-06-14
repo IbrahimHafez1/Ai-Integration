@@ -11,8 +11,7 @@
     "type-check": "tsc --noEmit --skipLibCheck --isolatedModules",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "test": "echo \"No tests specified\" && exit 0",
-    "prestart": "npm run build"
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [],
   "author": "",

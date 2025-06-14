@@ -65,7 +65,12 @@ app.use(
     origin:
       config.nodeEnv === 'production'
         ? [config.frontend.baseUrl, 'https://*.vercel.app'] // Allow Vercel domains
-        : ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'],
+        : [
+            'http://localhost:3000',
+            'http://localhost:5173',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:5173',
+          ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -126,10 +131,18 @@ try {
   logger.error('Failed to initialize WebSocket:', error);
 }
 
-httpServer.listen({ port: config.port, host: '0.0.0.0' }, () => {
-  logger.info(`🚀 Server listening on http://localhost:${config.port}`);
-  logger.info(`Environment: ${config.nodeEnv}`);
-  logger.info('Health check available at: /health');
-});
+const port = parseInt(process.env.PORT || config.port.toString(), 10);
+const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+
+httpServer
+  .listen(port, host, () => {
+    logger.info(`🚀 Server listening on http://${host}:${port}`);
+    logger.info(`Environment: ${config.nodeEnv}`);
+    logger.info('Health check available at: /health');
+  })
+  .on('error', (error) => {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  });
 
 export default app;
