@@ -45,14 +45,33 @@ export default function CRMLogs() {
             </thead>
             <tbody>
               {logs.length > 0 ? (
-                logs.map((log) => (
-                  <tr key={log._id}>
-                    <td>{log.rawResponse?.id}</td>
-                    <td>{log.leadLogId}</td>
-                    <td>{log.status}</td>
-                    <td>{new Date(log.createdAt).toLocaleString()}</td>
-                  </tr>
-                ))
+                logs.map((log) => {
+                  let leadId = null;
+                  if (log.rawResponse?.intermediateSteps) {
+                    const steps = log.rawResponse.intermediateSteps;
+                    const observationsWithId = steps
+                      .map((step) => {
+                        try {
+                          const obs = JSON.parse(step.observation);
+                          return obs && obs.id ? obs : null;
+                        } catch {
+                          return null;
+                        }
+                      })
+                      .filter((obs) => obs !== null);
+
+                    leadId = observationsWithId.length > 0 ? observationsWithId[0].id : null;
+                  }
+
+                  return (
+                    <tr key={log._id}>
+                      <td>{leadId || ''}</td>
+                      <td>{log.leadLogId}</td>
+                      <td>{log.status}</td>
+                      <td>{new Date(log.createdAt).toLocaleString()}</td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="4" className="crm-logs-empty">
