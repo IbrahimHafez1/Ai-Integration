@@ -3,31 +3,36 @@ import { AgentExecutor, createToolCallingAgent } from 'langchain/agents';
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
 import { createLeadTools } from '../utils/agentTools.js';
 
-const LEAD_PROCESSING_PROMPT = `You are a lead processing assistant that extracts contact information and creates leads in Zoho CRM.
+const DYNAMIC_LEAD_PROCESSING_PROMPT = `You are an intelligent lead processing assistant that can dynamically analyze messages and create leads in Zoho CRM.
 
-Your job is to:
-1. Extract contact information (name, email, phone, company) from the user's message
-2. Validate and format the extracted data
-3. Create a lead in Zoho CRM with the processed information
+You have access to these tools:
+- validateEmail: Check if an email address is valid
+- formatName: Extract and format names from text
+- cleanPhoneNumber: Clean and format phone numbers  
+- extractCompanyName: Extract company information from text
+- createZohoLead: Create a lead record in Zoho CRM
 
-Follow these steps in order:
-1. Use formatName to extract first and last name from the message
-2. If you find an email, use validateEmail to check if it's valid
-3. If you find a phone number, use cleanPhoneNumber to format it
-4. Use extractCompanyName to identify the company, or use "Individual" as default
-5. Finally, use createZohoLead with the collected information
+Your goal is to extract contact information from user messages and create a lead in Zoho CRM. 
 
-IMPORTANT: Always include the original message in the Description field when creating the lead.
+IMPORTANT GUIDELINES:
+- Analyze the message and decide which tools you need to use based on what information is present
+- You don't need to use every tool - only use the ones that are relevant to the data you find
+- Extract as much relevant information as possible from the message
+- Always include the original message in the Description field when creating the lead
+- A lead must have at least one form of contact information (name, email, or phone number)
+- Use reasonable defaults for missing information:
+  * First_Name: extracted first name or empty string if not found
+  * Last_Name: extracted last name or "Unknown" if no last name found
+  * Email: validated email or empty string if none found
+  * Phone: cleaned phone number or empty string if none found  
+  * Company: extracted company name or "Individual" if none found
+  * Description: always include the original user message
 
-Be thorough in extracting information but use reasonable defaults for missing data:
-- If no first name is found, use empty string
-- If no last name is found, use "Unknown"
-- If no email/phone is found, use empty string
-- If no company is found, use "Individual"
+Be smart about your approach - if you see an email, validate it. If you see a phone number, clean it. If you see company information, extract it. Then create the lead with all the processed information.
 
-The lead must have at least one form of contact (name, email, or phone) to be valid.`;
+Focus on creating a successful lead record rather than following a rigid process.`;
 
-export async function parseLeadWithLangChain(message: string, userId: string): Promise<any> {
+export async function parseLeadWithDynamicAgent(message: string, userId: string): Promise<any> {
   const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
   if (!GOOGLE_API_KEY) {
     throw new Error('Missing GOOGLE_API_KEY in environment variables');
@@ -37,15 +42,15 @@ export async function parseLeadWithLangChain(message: string, userId: string): P
     const model = new ChatGoogleGenerativeAI({
       model: 'gemini-1.5-flash',
       maxOutputTokens: 4096,
-      temperature: 0,
+      temperature: 0.1,
       apiKey: GOOGLE_API_KEY,
     });
 
     const tools = createLeadTools(userId);
 
     const prompt = ChatPromptTemplate.fromMessages([
-      ['system', LEAD_PROCESSING_PROMPT],
-      ['human', '{input}'],
+      ['system', DYNAMIC_LEAD_PROCESSING_PROMPT],
+      ['human', 'Process this message and create a lead: {input}'],
       new MessagesPlaceholder('agent_scratchpad'),
     ]);
 
@@ -59,8 +64,9 @@ export async function parseLeadWithLangChain(message: string, userId: string): P
       agent,
       tools,
       verbose: false,
-      maxIterations: 10,
+      maxIterations: 15,
       returnIntermediateSteps: true,
+      earlyStoppingMethod: 'generate',
     });
 
     const result = await agentExecutor.invoke({
@@ -69,32 +75,58 @@ export async function parseLeadWithLangChain(message: string, userId: string): P
 
     if (result.output) {
       let finalResult;
+
       try {
         finalResult = JSON.parse(result.output);
       } catch {
-        finalResult = {
-          status: 'SUCCESS',
-          message: result.output,
-        };
+        const outputLower = result.output.toLowerCase();
+        if (outputLower.includes('success') || outputLower.includes('created')) {
+          finalResult = {
+            status: 'SUCCESS',
+            message: result.output,
+          };
+        } else {
+          finalResult = {
+            status: 'ERROR',
+            message: result.output,
+          };
+        }
       }
 
       return {
-        status: 'SUCCESS',
+        status: finalResult.status || 'SUCCESS',
         ...finalResult,
         intermediateSteps: result.intermediateSteps,
+        toolsUsed: extractToolsUsed(result.intermediateSteps),
       };
     } else {
       throw new Error('No output received from agent');
     }
   } catch (error: any) {
-    throw new Error(`Failed to process lead with LangChain: ${error.message}`);
+    console.error('Dynamic agent processing error:', error);
+    throw new Error(`Failed to process lead with dynamic agent: ${error.message}`);
   }
+}
+
+function extractToolsUsed(intermediateSteps: any[]): string[] {
+  const toolsUsed = new Set<string>();
+
+  if (Array.isArray(intermediateSteps)) {
+    intermediateSteps.forEach((step) => {
+      if (step && typeof step === 'object' && step.action && step.action.tool) {
+        toolsUsed.add(step.action.tool);
+      }
+    });
+  }
+
+  return Array.from(toolsUsed);
 }
 
 export async function parseLead(message: string, userId: string): Promise<any> {
   try {
-    return await parseLeadWithLangChain(message, userId);
+    return await parseLeadWithDynamicAgent(message, userId);
   } catch (agentError: any) {
+    console.error('Lead processing failed:', agentError);
     throw new Error(`Failed to process lead: ${agentError.message}`);
   }
 }
