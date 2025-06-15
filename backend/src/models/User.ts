@@ -29,7 +29,7 @@ export interface IUser extends Document {
   zohoAccessToken?: string;
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Custom methods
   comparePassword(candidate: string): Promise<boolean>;
 
@@ -40,7 +40,7 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>(
   {
     email: { type: String, required: true, unique: true },
-    gmail: { type: String, unique: true },
+    gmail: { type: String, unique: true, sparse: true },
     name: { type: String, required: true },
     password: { type: String, required: true },
     isActive: { type: Boolean, default: false },
