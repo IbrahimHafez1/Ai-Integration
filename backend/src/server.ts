@@ -139,7 +139,7 @@ const createRateLimit = (windowMs: number, max: number, message: string) =>
     legacyHeaders: false,
   });
 
-app.use('/api/auth', createRateLimit(15 * 60 * 1000, 10, 'Too many authentication attempts'));
+app.use('/api/auth', createRateLimit(15 * 60 * 1000, 50, 'Too many authentication attempts'));
 app.use(
   '/api',
   createRateLimit(config.rateLimit.windowMs, config.rateLimit.max, 'Too many API requests'),
